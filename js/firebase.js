@@ -7,7 +7,10 @@ import {
     memoryLocalCache, 
     setLogLevel,
     doc,
-    onSnapshot
+    onSnapshot,
+    collection,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -47,4 +50,5 @@ try {
 }
 
 export const db = dbInstance;
-export { doc, onSnapshot };
+// Exporting all necessary methods for the Live Display engine
+export { doc, onSnapshot, collection, query, where };
