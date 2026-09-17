@@ -142,7 +142,7 @@ function renderPosterCard(res) {
     const uniqueGradient = getGradientForString(stableId);
     document.getElementById('posterGradientFooter').style.background = uniqueGradient;
 
-    // Advanced Program Code Extraction (Fixes "01 01 Nafeesath Mala")
+    // Advanced Program Code Extraction
     let rawCode = res.programCode || res.programNumber || res.code || '';
     let pName = res.programName || 'Competition Program';
     
@@ -188,37 +188,37 @@ function renderPosterCard(res) {
         const firstPlace = winnersList.filter(w => w.rank === 1);
         const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
 
-        // Centered Wrapper for Beautiful Alignment
-        let html = `<div class="flex flex-col gap-5 w-[85%] mx-auto mt-4 pl-6">`;
+        // TV-Safe Centered Wrapper for Beautiful Alignment
+        let html = `<div class="flex flex-col gap-4 w-[90%] md:w-[85%] mx-auto mt-2 pl-4 md:pl-6">`;
 
         firstPlace.forEach(w => {
             html += `
-            <div class="flex items-center gap-6">
-                <div class="text-[75px] text-amber-500 font-black drop-shadow-sm flex-shrink-0 leading-none">1</div>
-                <div class="min-w-0">
-                    <div class="ml-font text-4xl font-black text-stone-900 leading-[1.1] mb-1 truncate max-w-lg">
+            <div class="flex items-center gap-4 md:gap-6">
+                <div class="text-[60px] md:text-[75px] text-amber-500 font-black drop-shadow-sm flex-shrink-0 leading-none">1</div>
+                <div class="flex-1 min-w-0">
+                    <div class="ml-font text-3xl md:text-4xl font-black text-stone-900 leading-[1.1] mb-1 truncate">
                         ${escapeHTML(w.studentName || w.name || 'Candidate')}
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-sm font-bold uppercase tracking-widest text-stone-500">${escapeHTML(w.teamName || w.team || 'Team')}</span>
-                        ${w.grade ? `<span class="bg-stone-200 text-stone-600 px-2 py-0.5 rounded text-[10px] font-mono font-bold">Grade: ${escapeHTML(w.grade)}</span>` : ''}
+                    <div class="flex items-center gap-2 md:gap-3">
+                        <span class="text-xs md:text-sm font-bold uppercase tracking-widest text-stone-500 whitespace-nowrap">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                        ${w.grade ? `<span class="bg-stone-200 text-stone-600 px-2 py-0.5 rounded text-[9px] md:text-[10px] font-mono font-bold whitespace-nowrap">Grade: ${escapeHTML(w.grade)}</span>` : ''}
                     </div>
                 </div>
             </div>`;
         });
 
         if (runnersUp.length > 0) {
-            html += `<div class="flex flex-col gap-4 mt-3 pl-3">`;
+            html += `<div class="flex flex-col gap-3 mt-2 pl-2 md:pl-3">`;
             runnersUp.forEach(w => {
                 html += `
-                <div class="flex items-center gap-5">
-                    <div class="text-[40px] text-stone-300 font-black w-10 text-center flex-shrink-0 leading-none">${w.rank}</div>
-                    <div class="min-w-0">
-                        <div class="ml-font text-[28px] font-bold text-stone-700 leading-none mb-1.5 truncate max-w-md">
+                <div class="flex items-center gap-4 md:gap-5">
+                    <div class="text-[32px] md:text-[40px] text-stone-300 font-black w-8 md:w-10 text-center flex-shrink-0 leading-none">${w.rank}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="ml-font text-xl md:text-[28px] font-bold text-stone-700 leading-none mb-1 md:mb-1.5 truncate">
                             ${escapeHTML(w.studentName || w.name || 'Candidate')}
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold uppercase tracking-widest text-stone-400">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                            <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-stone-400 whitespace-nowrap">${escapeHTML(w.teamName || w.team || 'Team')}</span>
                         </div>
                     </div>
                 </div>`;
@@ -244,7 +244,7 @@ function renderPosterCard(res) {
 }
 
 // ─────────────────────────────────────────────
-// NORMAL SCREENS (ROTATION)
+// NORMAL SCREENS (ROTATION) - TV SAFE LAYOUT
 // ─────────────────────────────────────────────
 function renderTeamChampionship() {
     const grid = document.getElementById('teamChampionshipGrid');
@@ -265,14 +265,14 @@ function renderTeamChampionship() {
         const rankSymbol = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
 
         return `
-            <div class="glass-panel px-5 py-3 rounded-xl flex items-center justify-between gap-4 border">
-                <div class="w-8 text-center text-lg font-bold">${rankSymbol}</div>
-                <div class="w-48 font-black uppercase text-stone-900 tracking-wide truncate text-sm">${t.name}</div>
-                <div class="flex-1 bg-stone-300/60 h-2.5 rounded-full overflow-hidden">
+            <div class="glass-panel px-4 md:px-5 py-2.5 md:py-3 rounded-xl flex items-center gap-3 md:gap-4 border">
+                <div class="w-6 md:w-8 flex-shrink-0 text-center text-base md:text-lg font-bold">${rankSymbol}</div>
+                <div class="flex-1 min-w-0 font-black uppercase text-stone-900 tracking-wide truncate text-xs md:text-sm">${t.name}</div>
+                <div class="hidden sm:block w-1/4 md:w-1/3 bg-stone-300/60 h-2 md:h-2.5 rounded-full overflow-hidden flex-shrink-0">
                     <div class="h-full rounded-full transition-all duration-700" style="width: ${widthPct}%; background: ${gradient};"></div>
                 </div>
-                <div class="mono-font text-lg font-black text-emerald-900 w-24 text-right">
-                    ${pts} <span class="text-[10px] font-sans font-semibold text-stone-500">PTS</span>
+                <div class="mono-font text-base md:text-lg font-black text-emerald-900 w-16 md:w-24 text-right flex-shrink-0">
+                    ${pts} <span class="text-[8px] md:text-[10px] font-sans font-semibold text-stone-500">PTS</span>
                 </div>
             </div>
         `;
@@ -289,25 +289,25 @@ function renderCategoryLeaders(catName) {
     const top = cat.teams[0]; const runnersUp = cat.teams.slice(1, 3);
 
     let html = `
-        <div class="glass-panel p-6 rounded-2xl border mb-3 flex items-center justify-between">
-            <div class="flex items-center gap-5">
-                <div class="text-5xl">🥇</div>
-                <div>
-                    <span class="text-[11px] font-black uppercase tracking-widest text-amber-700">Category Leader</span>
-                    <h2 class="cinzel-font text-3xl font-black uppercase text-stone-900 mt-0.5">${top.name}</h2>
+        <div class="glass-panel p-5 md:p-6 rounded-2xl border mb-3 flex items-center justify-between">
+            <div class="flex items-center gap-4 md:gap-5 min-w-0">
+                <div class="text-4xl md:text-5xl flex-shrink-0">🥇</div>
+                <div class="min-w-0">
+                    <span class="text-[9px] md:text-[11px] font-black uppercase tracking-widest text-amber-700 whitespace-nowrap">Category Leader</span>
+                    <h2 class="cinzel-font text-2xl md:text-3xl font-black uppercase text-stone-900 mt-0.5 truncate">${top.name}</h2>
                 </div>
             </div>
-            <div class="mono-font text-4xl font-black text-emerald-900">${top.points} <span class="text-xs font-sans font-bold text-stone-500">PTS</span></div>
+            <div class="mono-font text-3xl md:text-4xl font-black text-emerald-900 flex-shrink-0 ml-4">${top.points} <span class="text-[10px] md:text-xs font-sans font-bold text-stone-500">PTS</span></div>
         </div>
     `;
 
     if (runnersUp.length > 0) {
-        html += `<div class="grid grid-cols-2 gap-3">`;
+        html += `<div class="grid grid-cols-2 gap-2 md:gap-3">`;
         runnersUp.forEach((t, i) => {
             html += `
-                <div class="glass-panel px-4 py-3 rounded-xl border flex items-center justify-between">
-                    <div class="flex items-center gap-3"><span class="text-xl">${i === 0 ? '🥈' : '🥉'}</span><span class="font-bold text-sm uppercase text-stone-800">${t.name}</span></div>
-                    <span class="mono-font font-bold text-stone-700">${t.points} pts</span>
+                <div class="glass-panel px-3 md:px-4 py-2.5 md:py-3 rounded-xl border flex items-center justify-between">
+                    <div class="flex items-center gap-2 md:gap-3 min-w-0"><span class="text-lg md:text-xl flex-shrink-0">${i === 0 ? '🥈' : '🥉'}</span><span class="font-bold text-xs md:text-sm uppercase text-stone-800 truncate">${t.name}</span></div>
+                    <span class="mono-font font-bold text-xs md:text-sm text-stone-700 flex-shrink-0 ml-2">${t.points} pts</span>
                 </div>
             `;
         });
@@ -325,11 +325,11 @@ function renderCategoryComparison(catName) {
     container.innerHTML = cat.teams.slice(0, 5).map(t => {
         const gradient = teamColorMap[t.name] || 'linear-gradient(90deg, #0f5132, #198754)';
         return `
-            <div class="glass-panel px-4 py-2.5 rounded-xl border flex items-center justify-between gap-4">
-                <span class="mono-font text-xs font-bold text-stone-500 w-6">#${t.rank}</span>
-                <span class="font-bold uppercase text-xs text-stone-800 w-40 truncate">${t.name}</span>
-                <div class="flex-1 bg-stone-300/60 h-2 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: ${t.pct}%; background: ${gradient};"></div></div>
-                <span class="mono-font text-sm font-bold text-stone-800 w-20 text-right">${t.points} pts</span>
+            <div class="glass-panel px-3 md:px-4 py-2 md:py-2.5 rounded-xl border flex items-center justify-between gap-3 md:gap-4">
+                <span class="mono-font text-[10px] md:text-xs font-bold text-stone-500 w-5 md:w-6 flex-shrink-0">#${t.rank}</span>
+                <span class="font-bold uppercase text-[10px] md:text-xs text-stone-800 flex-1 min-w-0 truncate">${t.name}</span>
+                <div class="hidden sm:block w-1/4 md:w-1/3 bg-stone-300/60 h-1.5 md:h-2 rounded-full overflow-hidden flex-shrink-0"><div class="h-full rounded-full" style="width: ${t.pct}%; background: ${gradient};"></div></div>
+                <span class="mono-font text-xs md:text-sm font-bold text-stone-800 w-16 md:w-20 text-right flex-shrink-0">${t.points} pts</span>
             </div>
         `;
     }).join('');
