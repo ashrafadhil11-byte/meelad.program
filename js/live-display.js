@@ -32,7 +32,7 @@ const TEAM_PALETTES = [
 ];
 const teamColorMap = {};
 
-// 95% Dark (Top Left) fading to 60% Light (Bottom Right) of unique hues
+// Update the gradient function with the specific 95% dark to 60% light shades
 function getGradientForString(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -139,8 +139,9 @@ function processNextAnnouncement() {
 function renderPosterCard(res) {
     const overlay = document.getElementById('posterAnnouncementOverlay');
     
-    // Inject Gradient to Footer (95% Top Left -> 60% Bottom Right)
-    const uniqueGradient = getGradientForString(res.programName || res.id || 'default');
+    // Assign consistent color based on unchanging programId
+    const stableId = res.programId || res.id || 'default';
+    const uniqueGradient = getGradientForString(stableId);
     document.getElementById('posterGradientFooter').style.background = uniqueGradient;
 
     // Populate Text
@@ -150,10 +151,10 @@ function renderPosterCard(res) {
     document.getElementById('posterQueueCounter').textContent = `Queue: ${announcementQueue.length + 1}`;
 
     // Generate QR Code via API to Dedicated Result Webpage
-    const programUrl = `${PUBLIC_DOMAIN_URL}?id=${instId}&prog=${res.programId || res.id}`;
+    const programUrl = `https://meelad-program.vercel.app/result.html?id=${instId}&prog=${stableId}`;
     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&format=svg&color=000000&bgcolor=ffffff&data=${encodeURIComponent(programUrl)}`;
     document.getElementById('posterQrImage').src = qrApiUrl;
-
+    
     // Extract Winners (1st, 2nd, 3rd)
     let winnersList = [];
     if (Array.isArray(res.marksData) && res.marksData.length > 0) {
