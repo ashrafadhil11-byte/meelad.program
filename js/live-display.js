@@ -3,8 +3,8 @@ import { db, doc, onSnapshot, collection, query, where } from './firebase.js';
 const DEFAULT_INSTITUTE_ID = "XnTaWEgDWBqdODmxXGG4";
 const instId = DEFAULT_INSTITUTE_ID;
 
-// Replace this domain with your actual public site URL where parents check results
-const PUBLIC_DOMAIN_URL = "https://your-domain.com/results"; 
+// Target domain for the QR code download link
+const PUBLIC_DOMAIN_URL = "https://meelad-program.vercel.app/pages/live-display.html?id=XnTaWEgDWBqdODmxXGG4"; 
 
 let dashboardData = null;
 let eventConfig = null;
@@ -32,20 +32,18 @@ const TEAM_PALETTES = [
 ];
 const teamColorMap = {};
 
-// Beautiful Dynamic Gradients Array
+// Beautiful Monochromatic Gradients (40% light to 90% dark of the SAME color)
 function getGradientForString(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
     const gradients = [
-        'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', // Emerald/Mint
-        'linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%)', // Deep Purple
-        'linear-gradient(135deg, #ee0979 0%, #ff6a00 100%)', // Sunset
-        'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)', // Azure Blue
-        'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)', // Golden Yellow
-        'linear-gradient(135deg, #b224ef 0%, #7579ff 100%)', // Lavender Violet
-        'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)', // Midnight Slate
-        'linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%)', // Crimson Red
-        'linear-gradient(135deg, #1fa2ff 0%, #12d8fa 50%, #a6ffcb 100%)' // Ocean Water
+        'linear-gradient(to bottom, #ffb5a7, #7a0016)', // Cherry Blossom / Deep Crimson
+        'linear-gradient(to bottom, #aed9e0, #003d5b)', // Sky Teal / Deep Ocean
+        'linear-gradient(to bottom, #d8e2dc, #1b4332)', // Sage Mint / Very Dark Forest
+        'linear-gradient(to bottom, #e0aaff, #3c096c)', // Soft Lilac / Midnight Violet
+        'linear-gradient(to bottom, #fcd5ce, #6a040f)', // Peach Coral / Deep Terracotta
+        'linear-gradient(to bottom, #c2c5aa, #333d29)', // Muted Olive / Deep Moss
+        'linear-gradient(to bottom, #a2d2ff, #03045e)'  // Ice Blue / Abyss Navy
     ];
     return gradients[Math.abs(hash) % gradients.length];
 }
@@ -96,7 +94,7 @@ function updateHeader() {
 }
 
 // ─────────────────────────────────────────────
-// NEW: DYNAMIC POSTER ENGINE
+// DYNAMIC POSTER ENGINE (BEIGE TOP + GRADIENT BOTTOM)
 // ─────────────────────────────────────────────
 function queueResultAnnouncement(resultData) {
     announcementQueue.push(resultData);
@@ -141,11 +139,10 @@ function processNextAnnouncement() {
 
 function renderPosterCard(res) {
     const overlay = document.getElementById('posterAnnouncementOverlay');
-    const card = document.getElementById('posterDynamicCard');
     
-    // 1. Generate Unique Gradient
+    // 1. Inject Gradient to Footer Only
     const uniqueGradient = getGradientForString(res.programName || res.id || 'default');
-    card.style.background = uniqueGradient;
+    document.getElementById('posterGradientFooter').style.background = uniqueGradient;
 
     // 2. Populate Text
     document.getElementById('posterCategory').textContent = res.categoryName || 'General';
@@ -154,9 +151,8 @@ function renderPosterCard(res) {
     document.getElementById('posterQueueCounter').textContent = `Queue: ${announcementQueue.length + 1}`;
 
     // 3. Generate QR Code via API
-    // Pointing to a generic URL with the program ID. The parents scan this to download the image from the portal.
-    const programUrl = `${PUBLIC_DOMAIN_URL}?prog=${res.programId || res.id}`;
-    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&format=svg&color=000000&bgcolor=ffffff&data=${encodeURIComponent(programUrl)}`;
+    const programUrl = `${PUBLIC_DOMAIN_URL}&prog=${res.programId || res.id}`;
+    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&format=svg&color=000000&bgcolor=ffffff&data=${encodeURIComponent(programUrl)}`;
     document.getElementById('posterQrImage').src = qrApiUrl;
 
     // 4. Extract Winners (1st, 2nd, 3rd)
@@ -169,27 +165,53 @@ function renderPosterCard(res) {
 
     const winnersContainer = document.getElementById('posterWinnersContainer');
     if (winnersList.length === 0) {
-        winnersContainer.innerHTML = `<div class="text-white/70 font-bold py-6 text-xl">Results finalized. Awaiting roster data.</div>`;
+        winnersContainer.innerHTML = `<div class="text-stone-500 font-bold py-6 text-xl">Results finalized. Awaiting roster data.</div>`;
     } else {
-        // Render Glassmorphism Winner Bars
-        winnersContainer.innerHTML = winnersList.map(w => `
-            <div class="flex items-center gap-6 bg-white/20 backdrop-blur-md border border-white/30 p-4 rounded-2xl shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
-                <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center font-black text-2xl shadow-inner text-stone-900 flex-shrink-0">
-                    ${w.rank}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="ml-font text-3xl font-extrabold text-white drop-shadow-md truncate leading-none mb-1">
+        // Group winners
+        const firstPlace = winnersList.filter(w => w.rank === 1);
+        const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
+
+        let html = `<div class="flex flex-col gap-6 w-full">`;
+
+        // BIG First Place Display
+        firstPlace.forEach(w => {
+            html += `
+            <div class="flex items-center gap-7">
+                <div class="text-7xl text-amber-500 font-black drop-shadow-sm flex-shrink-0">1</div>
+                <div>
+                    <div class="ml-font text-5xl font-black text-stone-900 leading-tight mb-1 truncate max-w-2xl">
                         ${escapeHTML(w.studentName || w.name || 'Candidate')}
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="text-xs font-black uppercase tracking-widest text-stone-900 bg-white/80 px-2.5 py-0.5 rounded shadow-sm">
-                            ${escapeHTML(w.teamName || w.team || 'Team')}
-                        </span>
-                        ${w.grade ? `<span class="text-xs font-mono font-bold text-white bg-black/20 border border-white/20 px-2 py-0.5 rounded shadow-sm">Grade: ${escapeHTML(w.grade)}</span>` : ''}
+                        <span class="text-sm font-bold uppercase tracking-widest text-stone-500">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                        ${w.grade ? `<span class="bg-stone-200 text-stone-600 px-2 py-0.5 rounded text-xs font-mono font-bold">Grade: ${escapeHTML(w.grade)}</span>` : ''}
                     </div>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        });
+
+        // Smaller, Stacked 2nd & 3rd Place Display
+        if (runnersUp.length > 0) {
+            html += `<div class="flex flex-col gap-5 mt-3 pl-2">`;
+            runnersUp.forEach(w => {
+                html += `
+                <div class="flex items-center gap-5">
+                    <div class="text-4xl text-stone-300 font-black w-8 text-center flex-shrink-0">${w.rank}</div>
+                    <div>
+                        <div class="ml-font text-3xl font-bold text-stone-700 leading-none mb-1 truncate max-w-xl">
+                            ${escapeHTML(w.studentName || w.name || 'Candidate')}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold uppercase tracking-widest text-stone-400">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            html += `</div>`;
+        }
+
+        html += `</div>`;
+        winnersContainer.innerHTML = html;
     }
 
     // Trigger Entrance
