@@ -12,15 +12,15 @@ let latestPublishedResults = [];
 let slidesList = [];
 let currentSlideIndex = 0;
 let rotatorTimer = null;
-const ROTATION_DURATION = 9000; // 9 seconds per view for readability
+let lastAnnouncedResultId = null; // Tracks the newest result to trigger the announcement
+const ROTATION_DURATION = 9000; 
 
-// Rich earthy accents suited for sand & mosque tones
 const TEAM_PALETTES = [
-    'linear-gradient(90deg, #0f5132, #198754)', // Emerald
-    'linear-gradient(90deg, #b45309, #d97706)', // Gold/Amber
-    'linear-gradient(90deg, #1e3a8a, #2563eb)', // Royal Blue
-    'linear-gradient(90deg, #6b21a8, #9333ea)', // Purple
-    'linear-gradient(90deg, #9f1239, #e11d48)'  // Rose
+    'linear-gradient(90deg, #0f5132, #198754)', 
+    'linear-gradient(90deg, #b45309, #d97706)', 
+    'linear-gradient(90deg, #1e3a8a, #2563eb)', 
+    'linear-gradient(90deg, #6b21a8, #9333ea)', 
+    'linear-gradient(90deg, #9f1239, #e11d48)'  
 ];
 const teamColorMap = {};
 
@@ -67,7 +67,42 @@ function updateHeader() {
     }
 }
 
-// 1. Team Standings: Elegant glass horizontal cards
+// Cinematic New Result Announcement
+function triggerNewResultAnnouncement(result) {
+    // Pause standard rotation
+    if (rotatorTimer) clearInterval(rotatorTimer);
+
+    const overlay = document.getElementById('newResultOverlay');
+    const headerEl = document.getElementById('normalViewHeader');
+    
+    // Hide active screens
+    document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+    headerEl.style.opacity = '0';
+
+    // Populate data
+    document.getElementById('announceProgramName').textContent = result.programName || 'Competition Event';
+    document.getElementById('announceCategory').textContent = result.categoryName || 'General';
+    document.getElementById('announceWinner').textContent = result.winnerName || 'Winner Declared';
+    document.getElementById('announceTeam').textContent = result.winningTeam || '';
+
+    // Trigger Entrance Animation
+    overlay.classList.remove('hidden', 'announce-exit');
+    overlay.classList.add('announce-active');
+
+    // Hold for 12 seconds, then dismiss and resume normal rotation
+    setTimeout(() => {
+        overlay.classList.remove('announce-active');
+        overlay.classList.add('announce-exit');
+        
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            headerEl.style.opacity = '1';
+            displayCurrentSlide(); // Resume immediately
+            startAutoRotation();
+        }, 600); // Wait for exit animation to finish
+    }, 12000);
+}
+
 function renderTeamChampionship() {
     const grid = document.getElementById('teamChampionshipGrid');
     if (!grid) return;
@@ -102,7 +137,6 @@ function renderTeamChampionship() {
     }).join('');
 }
 
-// 2. Category Leader Spotlight
 function renderCategoryLeaders(catName) {
     const container = document.getElementById('categoryLeadersContainer');
     if (!container) return;
@@ -114,7 +148,6 @@ function renderCategoryLeaders(catName) {
     }
 
     const top = cat.teams[0];
-    const gradient = teamColorMap[top.name] || 'linear-gradient(90deg, #0f5132, #198754)';
     const runnersUp = cat.teams.slice(1, 3);
 
     let html = `
@@ -152,7 +185,6 @@ function renderCategoryLeaders(catName) {
     container.innerHTML = html;
 }
 
-// 3. Category Comparison Rows
 function renderCategoryComparison(catName) {
     const container = document.getElementById('categoryComparisonContainer');
     if (!container) return;
@@ -175,7 +207,6 @@ function renderCategoryComparison(catName) {
     }).join('');
 }
 
-// Bottom Marquee Ticker
 function renderMarqueeRibbon() {
     const track = document.getElementById('ribbonTrack');
     if (!track) return;
@@ -205,6 +236,9 @@ function buildSlidesSequence() {
 }
 
 function displayCurrentSlide() {
+    // If the overlay is active, don't interrupt it with a slide change
+    if (document.getElementById('newResultOverlay').classList.contains('announce-active')) return;
+
     if (!slidesList.length) buildSlidesSequence();
     const slide = slidesList[currentSlideIndex];
     if (!slide) return;
@@ -267,14 +301,31 @@ document.addEventListener('DOMContentLoaded', () => {
             dashboardData = data;
             leaderboardData = data.publicLeaderboard || [];
             categoryPerformanceData = data.publicCategoryPerformance || [];
-            latestPublishedResults = data.publicLatestPublishedResults || [];
+            
+            const newResultsList = data.publicLatestPublishedResults || [];
+            
+            // Check if there's a new result to announce
+            if (newResultsList.length > 0) {
+                const newestResult = newResultsList[0];
+                // If this is not the first load, and the ID is different, trigger takeover
+                if (lastAnnouncedResultId !== null && newestResult.id !== lastAnnouncedResultId) {
+                    triggerNewResultAnnouncement(newestResult);
+                }
+                lastAnnouncedResultId = newestResult.id;
+            }
+            
+            latestPublishedResults = newResultsList;
         }
 
         assignTeamColors();
         buildSlidesSequence();
         updateHeader();
         renderMarqueeRibbon();
-        displayCurrentSlide();
+        
+        // Only force display if the announcement isn't running
+        if (!document.getElementById('newResultOverlay').classList.contains('announce-active')) {
+            displayCurrentSlide();
+        }
     });
 
     startAutoRotation();
