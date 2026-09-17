@@ -183,42 +183,42 @@ function renderPosterCard(res) {
 
     const winnersContainer = document.getElementById('posterWinnersContainer');
     if (winnersList.length === 0) {
-        winnersContainer.innerHTML = `<div class="text-stone-500 font-bold py-6 text-xl text-center w-full">Results finalized. Awaiting roster data.</div>`;
+        winnersContainer.innerHTML = `<div class="text-stone-500 font-bold py-4 text-sm text-center w-full">Results finalized. Awaiting roster data.</div>`;
     } else {
         const firstPlace = winnersList.filter(w => w.rank === 1);
         const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
 
-        // ✅ AUTO-CENTERING FIX: mx-auto applied to automatically balance regardless of zoom
-        let html = `<div class="flex flex-col justify-center gap-4 w-[95%] md:w-[85%] mx-auto mt-2">`;
+        // TV-Safe Centered Wrapper for Beautiful Alignment (Scaled Down)
+        let html = `<div class="flex flex-col justify-center gap-3 md:gap-4 w-[90%] md:w-[85%] mx-auto pl-4 md:pl-6 min-h-0">`;
 
         firstPlace.forEach(w => {
             html += `
-            <div class="flex items-center gap-4 md:gap-6">
-                <div class="text-[55px] md:text-[75px] text-amber-500 font-black drop-shadow-sm flex-shrink-0 leading-none">1</div>
+            <div class="flex items-center gap-3 md:gap-5">
+                <div class="text-[50px] md:text-[60px] text-amber-500 font-black drop-shadow-sm flex-shrink-0 leading-none">1</div>
                 <div class="flex-1 min-w-0">
-                    <div class="ml-font text-3xl md:text-4xl font-black text-stone-900 leading-[1.1] mb-1 truncate">
+                    <div class="ml-font text-2xl md:text-3xl font-black text-stone-900 leading-[1.1] mb-0.5 md:mb-1 truncate">
                         ${escapeHTML(w.studentName || w.name || 'Candidate')}
                     </div>
-                    <div class="flex items-center gap-2 md:gap-3">
-                        <span class="text-[10px] md:text-sm font-bold uppercase tracking-widest text-stone-500 whitespace-nowrap">${escapeHTML(w.teamName || w.team || 'Team')}</span>
-                        ${w.grade ? `<span class="bg-stone-200 text-stone-600 px-2 py-0.5 rounded text-[8px] md:text-[10px] font-mono font-bold whitespace-nowrap">Grade: ${escapeHTML(w.grade)}</span>` : ''}
+                    <div class="flex items-center gap-2">
+                        <span class="text-[9px] md:text-xs font-bold uppercase tracking-widest text-stone-500 whitespace-nowrap">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                        ${w.grade ? `<span class="bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded text-[8px] md:text-[9px] font-mono font-bold whitespace-nowrap">Grade: ${escapeHTML(w.grade)}</span>` : ''}
                     </div>
                 </div>
             </div>`;
         });
 
         if (runnersUp.length > 0) {
-            html += `<div class="flex flex-col gap-3 mt-2 md:mt-3 pl-2 md:pl-4">`;
+            html += `<div class="flex flex-col gap-2 md:gap-3 pl-2 md:pl-3">`;
             runnersUp.forEach(w => {
                 html += `
-                <div class="flex items-center gap-4 md:gap-5">
-                    <div class="text-[32px] md:text-[40px] text-stone-300 font-black w-8 md:w-10 text-center flex-shrink-0 leading-none">${w.rank}</div>
+                <div class="flex items-center gap-3 md:gap-4">
+                    <div class="text-[28px] md:text-[32px] text-stone-300 font-black w-6 md:w-8 text-center flex-shrink-0 leading-none">${w.rank}</div>
                     <div class="flex-1 min-w-0">
-                        <div class="ml-font text-xl md:text-[28px] font-bold text-stone-700 leading-none mb-1 md:mb-1.5 truncate">
+                        <div class="ml-font text-lg md:text-[22px] font-bold text-stone-700 leading-none mb-0.5 md:mb-1 truncate">
                             ${escapeHTML(w.studentName || w.name || 'Candidate')}
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-stone-400 whitespace-nowrap">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-stone-400 whitespace-nowrap">${escapeHTML(w.teamName || w.team || 'Team')}</span>
                         </div>
                     </div>
                 </div>`;
