@@ -14,10 +14,11 @@
         .mono-font { font-family: 'JetBrains Mono', monospace; }
         .ml-font { font-family: 'Anek Malayalam', 'Manjari', sans-serif; }
         .svg-mask { -webkit-mask-size: contain; mask-size: contain; -webkit-mask-position: center; mask-position: center; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+        
         .vertical-results-watermark { writing-mode: vertical-rl; text-orientation: mixed; font-size: 110px; font-weight: 900; letter-spacing: 0.25em; color: transparent; -webkit-text-stroke: 2px rgba(0, 0, 0, 0.04); line-height: 1; }
         
         #posterWrapper { width: 90%; max-width: 450px; position: relative; overflow: hidden; margin: 2rem auto; border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); background-color: #fdfbf7; }
-        #posterCanvas { width: 1080px; height: 1080px; position: absolute; top: 0; left: 0; transform-origin: top left; display: flex; flex-direction: column; background-color: #fdfbf7; }
+        #posterCanvas { width: 1080px; height: 1080px; position: absolute; top: 0; left: 0; transform-origin: top left; display: flex; flex-direction: column; background-color: #fdfbf7; background-image: linear-gradient(to bottom right, #ffffff, #fbf8f4, #f0ece4); }
         .ambient-glow { position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%); width: 80vw; height: 80vw; background: radial-gradient(circle, rgba(217, 119, 6, 0.15) 0%, transparent 60%); filter: blur(40px); z-index: -1; pointer-events: none; }
     </style>
 </head>
@@ -42,7 +43,7 @@
                 </div>
 
                 <div class="relative flex-1 flex flex-col z-10 pb-4">
-                    <div class="absolute right-2 top-0 bottom-0 z-0 pointer-events-none select-none flex items-center">
+                    <div class="absolute right-2 top-[120px] bottom-4 z-0 pointer-events-none select-none flex items-center">
                         <div class="vertical-results-watermark">RESULTS</div>
                     </div>
 
@@ -55,8 +56,8 @@
                         </div>
                     </div>
 
-                    <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full pr-12">
-                        <div class="text-stone-400 font-bold text-2xl animate-pulse">Fetching official records...</div>
+                    <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full">
+                        <div class="text-stone-400 font-bold text-2xl text-center animate-pulse">Fetching official records...</div>
                     </div>
                 </div>
             </div>
@@ -85,21 +86,16 @@
         </div>
     </div>
 
-    <!-- Action Buttons -->
+    <!-- Action Button Only -->
     <div class="w-full max-w-md mx-auto flex flex-col gap-3 mt-2 mb-10">
         <button id="btnDownload" class="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-lg tracking-wide shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all flex items-center justify-center gap-3">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             Download HD Poster
         </button>
-        <button id="btnReturn" class="w-full py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2">
-            Return to Live TV Display
-        </button>
     </div>
 
     <script type="module">
         import { db, doc, getDoc, collection, query, where, getDocs } from './js/firebase.js';
-
-        let targetInstId = '';
 
         function resizePoster() {
             const wrapper = document.getElementById('posterWrapper');
@@ -131,11 +127,11 @@
 
         async function fetchAndRenderResult() {
             const params = new URLSearchParams(window.location.search);
-            targetInstId = params.get('id');
+            const targetInstId = params.get('id');
             const progId = params.get('prog');
 
             if (!targetInstId || !progId) {
-                document.getElementById('posterWinnersContainer').innerHTML = `<div class="text-red-500 font-bold text-2xl">Error: Missing ID in URL.</div>`;
+                document.getElementById('posterWinnersContainer').innerHTML = `<div class="text-red-500 font-bold text-2xl text-center">Error: Missing ID in URL.</div>`;
                 return;
             }
 
@@ -153,33 +149,38 @@
                 }
 
                 if (!resData || resData.status !== 'published') {
-                    document.getElementById('posterWinnersContainer').innerHTML = `<div class="text-red-500 font-bold text-2xl">Result not found or not published.</div>`;
+                    document.getElementById('posterWinnersContainer').innerHTML = `<div class="text-red-500 font-bold text-2xl text-center">Result not found or not published.</div>`;
                     return;
                 }
 
-                // Inject Colors & Details
                 const stableId = resData.programId || progId;
                 document.getElementById('posterGradientFooter').style.background = getGradientForString(stableId);
                 document.getElementById('posterCategory').textContent = resData.categoryName || 'General';
                 document.getElementById('posterQrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&format=svg&color=000000&bgcolor=ffffff&data=${encodeURIComponent(window.location.href)}`;
 
-                // ✅ FIXED: Prevent double program numbers (e.g. 03 03 Calligraphy)
-                let pCode = resData.programCode ? String(resData.programCode).padStart(2, '0') : '01';
+                let rawCode = resData.programCode || resData.programNumber || resData.code || '';
                 let pName = resData.programName || 'Competition Result';
                 
-                let rawCode = String(resData.programCode || '').trim();
-                let paddedCode = rawCode.padStart(2, '0');
-                if (rawCode && pName.toLowerCase().startsWith(rawCode.toLowerCase())) {
-                    pName = pName.substring(rawCode.length).trim();
-                } else if (paddedCode && pName.toLowerCase().startsWith(paddedCode.toLowerCase())) {
-                    pName = pName.substring(paddedCode.length).trim();
+                if (!rawCode) {
+                    const match = pName.trim().match(/^(\d+)/);
+                    if (match) rawCode = match[1];
                 }
-                if (pName.startsWith('-') || pName.startsWith(':')) pName = pName.substring(1).trim();
+                let pCode = rawCode ? String(rawCode).padStart(2, '0') : '--';
+
+                let cleanName = pName.trim();
+                if (rawCode) {
+                    const paddedCode = String(rawCode).padStart(2, '0');
+                    if (cleanName.toLowerCase().startsWith(String(rawCode).toLowerCase())) {
+                        cleanName = cleanName.substring(String(rawCode).length).trim();
+                    } else if (cleanName.toLowerCase().startsWith(paddedCode.toLowerCase())) {
+                        cleanName = cleanName.substring(paddedCode.length).trim();
+                    }
+                }
+                if (cleanName.startsWith('-') || cleanName.startsWith(':')) cleanName = cleanName.substring(1).trim();
 
                 document.getElementById('posterProgCode').textContent = pCode;
-                document.getElementById('posterProgName').textContent = pName;
+                document.getElementById('posterProgName').textContent = cleanName;
 
-                // Rank Calculations
                 let winnersList = [];
                 if (Array.isArray(resData.marksData) && resData.marksData.length > 0) {
                     winnersList = [...resData.marksData].filter(m => m.rank && m.rank <= 3).sort((a, b) => a.rank - b.rank);
@@ -189,21 +190,22 @@
 
                 const winnersContainer = document.getElementById('posterWinnersContainer');
                 if (winnersList.length === 0) {
-                    winnersContainer.innerHTML = `<div class="text-stone-500 font-bold text-2xl pl-16">No ranked winners recorded.</div>`;
+                    winnersContainer.innerHTML = `<div class="text-stone-500 font-bold text-2xl text-center">No ranked winners recorded.</div>`;
                     return;
                 }
 
                 const firstPlace = winnersList.filter(w => w.rank === 1);
                 const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
 
-                let html = `<div class="flex flex-col gap-7 w-full pl-[90px] mt-4">`;
+                // Beautiful Centered Margin Shift
+                let html = `<div class="flex flex-col gap-7 w-[85%] mx-auto mt-4 pl-8">`;
 
                 firstPlace.forEach(w => {
                     html += `
                     <div class="flex items-center gap-7">
                         <div class="text-[85px] leading-none text-amber-500 font-black drop-shadow-sm flex-shrink-0">1</div>
                         <div class="min-w-0">
-                            <div class="ml-font text-[42px] font-black text-stone-900 leading-[1.1] mb-2 truncate max-w-[500px]">
+                            <div class="ml-font text-[42px] font-black text-stone-900 leading-[1.1] mb-2 truncate max-w-[550px]">
                                 ${escapeHTML(w.studentName || w.name || 'Candidate')}
                             </div>
                             <div class="flex items-center gap-3">
@@ -238,7 +240,7 @@
                 setTimeout(resizePoster, 300);
             } catch (error) {
                 console.error(error);
-                document.getElementById('posterWinnersContainer').innerHTML = `<div class="text-red-500 font-bold text-2xl">Error connecting to database.</div>`;
+                document.getElementById('posterWinnersContainer').innerHTML = `<div class="text-red-500 font-bold text-2xl text-center">Error connecting to database.</div>`;
             }
         }
 
@@ -263,14 +265,6 @@
                 btn.innerHTML = `Error Generating Poster`;
                 setTimeout(() => btn.innerHTML = originalText, 3000);
             });
-        });
-
-        document.getElementById('btnReturn').addEventListener('click', () => {
-            if(targetInstId) {
-                window.location.href = `./pages/live-display.html?id=${targetInstId}`;
-            } else {
-                window.location.href = './index.html';
-            }
         });
 
         fetchAndRenderResult();
