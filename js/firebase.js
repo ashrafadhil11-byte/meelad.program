@@ -10,7 +10,9 @@ import {
     onSnapshot,
     collection,
     query,
-    where
+    where,
+    getDoc,
+    getDocs
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -50,5 +52,6 @@ try {
 }
 
 export const db = dbInstance;
-// Exporting all necessary methods for the Live Display engine
-export { doc, onSnapshot, collection, query, where };
+
+// ✅ FIXED: Added getDoc and getDocs so result.html can fetch data
+export { doc, onSnapshot, collection, query, where, getDoc, getDocs };
