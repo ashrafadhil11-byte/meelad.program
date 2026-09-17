@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Championship Signage - Landscape</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Cinzel:wght@700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Manjari:wght@400;700&family=Anek+Malayalam:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
             --sand-bg: #f5ebe1;
             --text-dark: #1e1b18;
             --emerald-accent: #0f5132;
             --gold-accent: #c59b27;
-            --glass-bg: rgba(255, 255, 255, 0.72);
+            --glass-bg: rgba(255, 255, 255, 0.76);
             --glass-border: rgba(210, 185, 155, 0.45);
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Manjari', sans-serif;
             background-color: var(--sand-bg);
             color: var(--text-dark);
             margin: 0;
@@ -27,6 +27,7 @@
 
         .cinzel-font { font-family: 'Cinzel', serif; }
         .mono-font { font-family: 'JetBrains Mono', monospace; }
+        .ml-font { font-family: 'Anek Malayalam', 'Manjari', sans-serif; }
 
         /* Fullscreen Madinah Background */
         .bg-canvas {
@@ -41,7 +42,6 @@
             background-repeat: no-repeat;
         }
 
-        /* Glassmorphic Panel on Open Space */
         .glass-panel {
             background: var(--glass-bg);
             backdrop-filter: blur(14px);
@@ -50,7 +50,6 @@
             box-shadow: 0 16px 36px -10px rgba(78, 52, 28, 0.08);
         }
 
-        /* SVG Masking Class for Campaign Logo */
         .svg-mask {
             -webkit-mask-size: contain;
             mask-size: contain;
@@ -60,7 +59,7 @@
             mask-repeat: no-repeat;
         }
 
-        /* View Transition Animations */
+        /* Screen Rotator Views */
         .screen-view { display: none; opacity: 0; }
         .screen-view.active {
             display: flex;
@@ -71,24 +70,41 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Announcement Takeover Animation */
-        .announce-active {
+        /* Poster Announcement Transitions */
+        .poster-active {
             display: flex !important;
-            animation: cinematicPop 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: posterEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .announce-exit {
-            animation: cinematicFadeOut 0.6s ease-in forwards;
+        .poster-exit {
+            animation: posterExitAnim 0.5s ease-in forwards;
         }
-        @keyframes cinematicPop {
-            0% { opacity: 0; transform: scale(0.9) translateY(30px); filter: blur(10px); }
+        @keyframes posterEntrance {
+            0% { opacity: 0; transform: scale(0.94) translateY(24px); filter: blur(8px); }
             100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
         }
-        @keyframes cinematicFadeOut {
+        @keyframes posterExitAnim {
             0% { opacity: 1; transform: scale(1); filter: blur(0); }
-            100% { opacity: 0; transform: scale(1.05); filter: blur(10px); }
+            100% { opacity: 0; transform: scale(1.03) translateY(-12px); filter: blur(8px); }
         }
 
-        /* Continuous Bottom Ticker */
+        /* Vertical Outline 'RESULTS' Stamp */
+        .vertical-results-watermark {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 5rem;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            color: transparent;
+            -webkit-text-stroke: 1.5px rgba(197, 155, 39, 0.35);
+        }
+
+        /* Rank Badge Circles */
+        .rank-circle-gold {
+            background: linear-gradient(135deg, #d4a340, #9e7116);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(158, 113, 22, 0.35);
+        }
+
         .marquee-track {
             display: flex;
             white-space: nowrap;
@@ -101,81 +117,110 @@
     </style>
 </head>
 <body class="h-screen w-screen relative">
-    <!-- Mosque Artwork Layer -->
     <div class="bg-canvas"></div>
 
-    <!-- Main Live Presentation Layout -->
     <div class="relative z-10 h-screen w-screen flex flex-col justify-between">
         
-        <!-- TOP ZONE: Header + Metric Badges + Logos -->
-        <header class="px-10 pt-8 pb-4 flex items-center justify-between w-full">
-            
-            <!-- Left Header (Main Logo & Title) -->
-            <div class="flex items-center gap-6">
+        <!-- TOP ZONE: Header Bar -->
+        <header class="px-10 pt-7 pb-3 flex items-center justify-between w-full">
+            <div class="flex items-center gap-5">
+                <img src="../assets/icflgo.svg" alt="Main Logo" class="h-16 w-auto object-contain drop-shadow-md">
                 
-                <!-- MAIN LOGO (ICFLGO) Adjusted to h-16 for better balance -->
-                <img src="../assets/icflgo.svg" alt="ICF Logo" class="h-16 w-auto object-contain drop-shadow-md">
-                
-                <div class="mt-2">
+                <div class="mt-1">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-700/10 text-emerald-800 text-[11px] font-black tracking-widest uppercase border border-emerald-700/20">
                             <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span> LIVE BROADCAST
                         </span>
                         <span id="statLastUpdated" class="text-xs text-stone-500 font-semibold tracking-wide">Syncing...</span>
                     </div>
-                    <h1 id="liveMeeladName" class="cinzel-font text-3xl md:text-4xl font-black tracking-tight text-stone-900 leading-none">
+                    <h1 id="liveMeeladName" class="cinzel-font text-3xl font-black tracking-tight text-stone-900 leading-none">
                         MEELAD CHAMPIONSHIP
                     </h1>
                 </div>
             </div>
 
-            <!-- Right Header (Metrics & Campaign Logo) -->
-            <div class="flex items-center gap-8 mt-2">
-                
-                <div class="glass-panel rounded-2xl px-6 py-2.5 flex items-center gap-8 border">
+            <div class="flex items-center gap-6 mt-1">
+                <div class="glass-panel rounded-2xl px-6 py-2 flex items-center gap-7 border">
                     <div class="text-left">
                         <div class="text-[10px] uppercase tracking-widest font-black text-stone-500">Programs</div>
-                        <div id="statCompletedProg" class="mono-font text-xl font-bold text-emerald-800">- / -</div>
+                        <div id="statCompletedProg" class="mono-font text-lg font-bold text-emerald-800">- / -</div>
                     </div>
                     <div class="h-7 w-px bg-stone-300"></div>
                     <div class="text-left">
                         <div class="text-[10px] uppercase tracking-widest font-black text-stone-500">Progress</div>
-                        <div id="statProgressPct" class="mono-font text-xl font-bold text-amber-700">-%</div>
+                        <div id="statProgressPct" class="mono-font text-lg font-bold text-amber-700">-%</div>
                     </div>
                     <div class="h-7 w-px bg-stone-300"></div>
                     <div class="text-left">
                         <div class="text-[10px] uppercase tracking-widest font-black text-stone-500">Pending</div>
-                        <div id="statPendingProg" class="mono-font text-xl font-bold text-stone-700">-</div>
+                        <div id="statPendingProg" class="mono-font text-lg font-bold text-stone-700">-</div>
                     </div>
                 </div>
 
-                <div class="w-16 h-16 bg-amber-700/90 svg-mask drop-shadow-md" 
+                <div class="w-14 h-14 bg-amber-700/90 svg-mask drop-shadow-md" 
                      style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');">
                 </div>
             </div>
         </header>
 
-        <!-- MIDDLE ZONE: Content on Left (60% width), Dome Free on Right -->
-        <main class="flex-1 px-10 py-2 flex flex-col justify-center max-w-[62vw] relative">
+        <!-- MIDDLE ZONE: Content Area on Left -->
+        <main class="flex-1 px-10 py-1 flex flex-col justify-center max-w-[62vw] relative">
             
-            <!-- NEW RESULT CINEMATIC TAKEOVER (Hidden by default) -->
-            <div id="newResultOverlay" class="absolute inset-0 z-50 hidden flex-col items-center justify-center bg-stone-900/80 backdrop-blur-xl rounded-3xl border-2 border-amber-500/40 p-10 text-center shadow-[0_0_60px_rgba(197,155,39,0.3)] mx-4 my-2">
-                <div class="text-amber-500 font-black tracking-widest uppercase text-xs mb-3 animate-pulse flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> JUST ANNOUNCED
-                </div>
-                <h2 id="announceProgramName" class="cinzel-font text-4xl font-black text-white mb-3">Program Name</h2>
-                <div id="announceCategory" class="inline-block px-4 py-1 bg-stone-800 text-amber-400 border border-amber-500/20 text-xs font-bold rounded-full mb-8 uppercase tracking-widest">Category</div>
+            <!-- ─────────────────────────────────────────────
+                 POSTER TAKEOVER OVERLAY (30 SECONDS EACH)
+                 ───────────────────────────────────────────── -->
+            <div id="posterAnnouncementOverlay" class="absolute inset-0 z-50 hidden flex-col justify-between glass-panel rounded-3xl p-7 border-2 border-amber-600/40 shadow-2xl overflow-hidden my-1">
                 
-                <div class="w-full max-w-md bg-white/5 border border-white/10 rounded-2xl p-6 relative overflow-hidden">
-                    <div class="absolute -right-4 -top-4 text-7xl opacity-10">🥇</div>
-                    <div class="text-stone-400 text-[10px] uppercase tracking-widest font-bold mb-1">First Place Winner</div>
-                    <h3 id="announceWinner" class="text-3xl font-black text-emerald-400 mb-1 drop-shadow-md">Winner Name</h3>
-                    <div id="announceTeam" class="text-lg font-bold text-stone-300 uppercase tracking-wide">Team Name</div>
+                <!-- Background Vertical RESULTS Text -->
+                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none z-0">
+                    <div class="vertical-results-watermark">RESULTS</div>
+                </div>
+
+                <!-- Top: Badge + Category + Program Title -->
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between border-b border-stone-300/80 pb-3 mb-4">
+                        <div class="flex items-center gap-4">
+                            <span class="px-3 py-1 rounded-full bg-amber-600 text-stone-950 font-black text-xs tracking-widest uppercase shadow-sm">
+                                📢 JUST ANNOUNCED
+                            </span>
+                            <span id="posterCategory" class="ml-font text-base font-bold text-stone-600">സീനിയർ</span>
+                        </div>
+                        <div id="posterQueueCounter" class="text-xs font-mono font-bold text-stone-500 bg-stone-200/80 px-2.5 py-1 rounded-full">
+                            1 / 1
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-5">
+                        <div id="posterProgCode" class="mono-font text-4xl font-black text-stone-800 border-2 border-stone-800/20 px-3.5 py-1 rounded-2xl bg-white/50">
+                            03
+                        </div>
+                        <div>
+                            <h2 id="posterProgName" class="ml-font text-3xl md:text-4xl font-extrabold text-stone-900 tracking-tight leading-tight">
+                                ഖിറാഅത്ത്
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Middle: Position Winners List (1, 2, 3) -->
+                <div id="posterWinnersContainer" class="relative z-10 space-y-3.5 my-auto max-w-[85%]">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+                <!-- Bottom: 30-Second Countdown Progress Bar -->
+                <div class="relative z-10 pt-2 border-t border-stone-200">
+                    <div class="flex justify-between items-center text-[10px] font-mono uppercase font-bold text-stone-500 mb-1.5">
+                        <span>Result Broadcast Window</span>
+                        <span id="posterTimerSec">30s</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-stone-300/60 rounded-full overflow-hidden">
+                        <div id="posterTimeFill" class="h-full bg-amber-600 w-0"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Rotating View Header Indicator -->
-            <div class="flex items-center justify-between mb-4 px-1 opacity-100 transition-opacity duration-300" id="normalViewHeader">
+            <!-- Normal Slides Header Indicator -->
+            <div class="flex items-center justify-between mb-4 px-1" id="normalViewHeader">
                 <div class="flex items-center gap-3">
                     <span id="viewTitle" class="cinzel-font text-2xl font-black uppercase text-stone-800 tracking-wider">Overall Standings</span>
                     <span id="viewCategoryBadge" class="hidden text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-900 border border-amber-500/30"></span>
@@ -185,6 +230,7 @@
                 </div>
             </div>
 
+            <!-- Normal Rotator Views -->
             <div id="screenTeamChampionship" class="screen-view active flex-col w-full">
                 <div id="teamChampionshipGrid" class="space-y-2.5"></div>
             </div>
@@ -198,9 +244,9 @@
             </div>
         </main>
 
-        <!-- BOTTOM ZONE: Sponsors & Results Ticker -->
+        <!-- BOTTOM ZONE: Sponsors + Marquee Ribbon -->
         <footer class="w-full flex flex-col">
-            <div class="px-10 py-2 flex items-center justify-between">
+            <div class="px-10 py-1.5 flex items-center justify-between">
                 <div class="flex items-center gap-6">
                     <span class="text-[10px] font-black uppercase tracking-widest text-stone-500">Official Sponsors</span>
                     <div id="sponsorLogoContainer" class="flex items-center gap-5">
