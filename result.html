@@ -13,16 +13,9 @@
         .cinzel-font { font-family: 'Cinzel', serif; }
         .mono-font { font-family: 'JetBrains Mono', monospace; }
         .ml-font { font-family: 'Anek Malayalam', 'Manjari', sans-serif; }
-
         .svg-mask { -webkit-mask-size: contain; mask-size: contain; -webkit-mask-position: center; mask-position: center; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
-
-        .vertical-results-watermark {
-            writing-mode: vertical-rl; text-orientation: mixed;
-            font-size: 110px; font-weight: 900; letter-spacing: 0.25em;
-            color: transparent; -webkit-text-stroke: 2px rgba(0, 0, 0, 0.04);
-            line-height: 1;
-        }
-
+        .vertical-results-watermark { writing-mode: vertical-rl; text-orientation: mixed; font-size: 110px; font-weight: 900; letter-spacing: 0.25em; color: transparent; -webkit-text-stroke: 2px rgba(0, 0, 0, 0.04); line-height: 1; }
+        
         #posterWrapper { width: 90%; max-width: 450px; position: relative; overflow: hidden; margin: 2rem auto; border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); background-color: #fdfbf7; }
         #posterCanvas { width: 1080px; height: 1080px; position: absolute; top: 0; left: 0; transform-origin: top left; display: flex; flex-direction: column; background-color: #fdfbf7; }
         .ambient-glow { position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%); width: 80vw; height: 80vw; background: radial-gradient(circle, rgba(217, 119, 6, 0.15) 0%, transparent 60%); filter: blur(40px); z-index: -1; pointer-events: none; }
@@ -42,18 +35,13 @@
             
             <!-- TOP SECTION -->
             <div class="relative z-10 flex-1 flex flex-col px-12 pt-10 pb-4 text-stone-900 overflow-hidden">
-                
-                <!-- Header (Enlarged QLB Campaign Logo) -->
                 <div class="relative z-20 flex justify-between items-center mb-8 border-b border-stone-200 pb-5">
                     <img src="./assets/icflgo.svg" alt="ICF" class="h-16 w-auto object-contain">
-                    <span class="cinzel-font text-stone-800 text-[26px] font-black tracking-[0.25em] uppercase">
-                        Sweets of Madina '26
-                    </span>
+                    <span class="cinzel-font text-stone-800 text-[26px] font-black tracking-[0.25em] uppercase">Sweets of Madina '26</span>
                     <div class="w-20 h-20 bg-stone-800 svg-mask" style="-webkit-mask-image: url('./assets/qlb.svg'); mask-image: url('./assets/qlb.svg');"></div>
                 </div>
 
                 <div class="relative flex-1 flex flex-col z-10 pb-4">
-                    <!-- Watermark strictly bounded below header line -->
                     <div class="absolute right-2 top-0 bottom-0 z-0 pointer-events-none select-none flex items-center">
                         <div class="vertical-results-watermark">RESULTS</div>
                     </div>
@@ -67,7 +55,6 @@
                         </div>
                     </div>
 
-                    <!-- Dynamic Winners List -->
                     <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full pr-12">
                         <div class="text-stone-400 font-bold text-2xl animate-pulse">Fetching official records...</div>
                     </div>
@@ -170,15 +157,29 @@
                     return;
                 }
 
+                // Inject Colors & Details
                 const stableId = resData.programId || progId;
                 document.getElementById('posterGradientFooter').style.background = getGradientForString(stableId);
-                
                 document.getElementById('posterCategory').textContent = resData.categoryName || 'General';
-                document.getElementById('posterProgCode').textContent = resData.programCode ? String(resData.programCode).padStart(2, '0') : '01';
-                document.getElementById('posterProgName').textContent = resData.programName || 'Competition Result';
-
                 document.getElementById('posterQrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&format=svg&color=000000&bgcolor=ffffff&data=${encodeURIComponent(window.location.href)}`;
 
+                // ✅ FIXED: Prevent double program numbers (e.g. 03 03 Calligraphy)
+                let pCode = resData.programCode ? String(resData.programCode).padStart(2, '0') : '01';
+                let pName = resData.programName || 'Competition Result';
+                
+                let rawCode = String(resData.programCode || '').trim();
+                let paddedCode = rawCode.padStart(2, '0');
+                if (rawCode && pName.toLowerCase().startsWith(rawCode.toLowerCase())) {
+                    pName = pName.substring(rawCode.length).trim();
+                } else if (paddedCode && pName.toLowerCase().startsWith(paddedCode.toLowerCase())) {
+                    pName = pName.substring(paddedCode.length).trim();
+                }
+                if (pName.startsWith('-') || pName.startsWith(':')) pName = pName.substring(1).trim();
+
+                document.getElementById('posterProgCode').textContent = pCode;
+                document.getElementById('posterProgName').textContent = pName;
+
+                // Rank Calculations
                 let winnersList = [];
                 if (Array.isArray(resData.marksData) && resData.marksData.length > 0) {
                     winnersList = [...resData.marksData].filter(m => m.rank && m.rank <= 3).sort((a, b) => a.rank - b.rank);
@@ -195,7 +196,6 @@
                 const firstPlace = winnersList.filter(w => w.rank === 1);
                 const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
 
-                // Indented the container for beautiful hierarchy
                 let html = `<div class="flex flex-col gap-7 w-full pl-[90px] mt-4">`;
 
                 firstPlace.forEach(w => {
@@ -265,7 +265,6 @@
             });
         });
 
-        // Redirect back to Live Display
         document.getElementById('btnReturn').addEventListener('click', () => {
             if(targetInstId) {
                 window.location.href = `./pages/live-display.html?id=${targetInstId}`;
