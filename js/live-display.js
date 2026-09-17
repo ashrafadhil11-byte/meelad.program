@@ -1,20 +1,25 @@
 import { db, doc, onSnapshot } from './firebase.js';
 
-// Resolves institute ID from query parameter, localStorage, or sessionStorage
+const DEFAULT_INSTITUTE_ID = "XnTaWEgDWBqdODmxXGG4";
+
 function resolveInstituteId() {
     const urlParams = new URLSearchParams(window.location.search);
     let id = urlParams.get('id') || urlParams.get('instId');
-    if (id) {
-        try {
-            localStorage.setItem('currentInstituteId', id);
-            localStorage.setItem('melad_institute_id', id);
-        } catch (e) {}
-        return id;
+    
+    if (!id) {
+        id = localStorage.getItem('currentInstituteId') ||
+             localStorage.getItem('melad_institute_id') ||
+             sessionStorage.getItem('currentInstituteId') ||
+             sessionStorage.getItem('melad_institute_id') ||
+             DEFAULT_INSTITUTE_ID;
     }
-    return localStorage.getItem('currentInstituteId') ||
-           localStorage.getItem('melad_institute_id') ||
-           sessionStorage.getItem('currentInstituteId') ||
-           sessionStorage.getItem('melad_institute_id');
+
+    try {
+        localStorage.setItem('currentInstituteId', id);
+        localStorage.setItem('melad_institute_id', id);
+    } catch (e) {}
+
+    return id;
 }
 
 const instId = resolveInstituteId();
