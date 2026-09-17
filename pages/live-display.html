@@ -35,13 +35,12 @@
         .poster-card-entrance { animation: cardPop 0.8s cubic-bezier(0.2, 1.2, 0.3, 1) forwards; }
         @keyframes cardPop { 0% { opacity: 0; transform: scale(0.8) translateY(40px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 
-        /* Adjusted Watermark to fit perfectly and securely in the middle zone */
         .vertical-results-watermark {
             writing-mode: vertical-rl;
             text-orientation: mixed;
             font-size: clamp(3.5rem, 8vh, 6rem);
             font-weight: 900;
-            letter-spacing: 0.3em;
+            letter-spacing: 0.35em;
             color: transparent;
             -webkit-text-stroke: 1.5px rgba(0, 0, 0, 0.04);
             line-height: 1;
@@ -143,7 +142,7 @@
              ───────────────────────────────────────────── -->
         <div id="posterAnnouncementOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/60 p-6">
             
-            <div id="posterDynamicCard" class="poster-card-entrance relative w-[88vh] h-[88vh] aspect-square rounded-[2rem] shadow-2xl overflow-hidden flex flex-col bg-[#fdfbf7]">
+            <div id="posterDynamicCard" class="poster-card-entrance relative w-[88vh] h-[88vh] aspect-square rounded-[2rem] shadow-2xl overflow-hidden flex flex-col bg-gradient-to-br from-[#ffffff] via-[#fbf8f4] to-[#f0ece4]">
                 
                 <!-- TOP SECTION: Light Beige Workspace -->
                 <div class="relative z-10 flex-1 flex flex-col px-10 pt-8 overflow-hidden">
@@ -157,17 +156,17 @@
                         <div class="w-12 h-12 bg-stone-800 svg-mask" style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');"></div>
                     </div>
 
-                    <!-- Inner Body (Holds Watermark safely below the line) -->
+                    <!-- Inner Body -->
                     <div class="relative flex-1 flex flex-col z-10 pb-4">
                         
-                        <!-- Watermark safely trapped between header line and bottom gradient -->
-                        <div class="absolute right-0 top-0 bottom-0 flex items-center justify-center pointer-events-none select-none z-0">
+                        <!-- Watermark safely pushed down below the header -->
+                        <div class="absolute right-0 top-[110px] bottom-0 flex items-center justify-center pointer-events-none select-none z-0">
                             <div class="vertical-results-watermark pr-2">RESULTS</div>
                         </div>
 
                         <!-- Program Details -->
                         <div class="relative z-10 flex items-center gap-5 mb-6">
-                            <div id="posterProgCode" class="mono-font text-6xl font-black text-stone-300">03</div>
+                            <div id="posterProgCode" class="mono-font text-6xl font-black text-stone-300">01</div>
                             <div class="flex flex-col border-l-[3px] border-amber-500 pl-5">
                                 <span id="posterCategory" class="ml-font text-stone-500 font-bold uppercase tracking-widest text-[11px] mb-1">സീനിയർ</span>
                                 <h2 id="posterProgName" class="ml-font text-4xl font-black text-stone-900 tracking-tight leading-none line-clamp-2">ഖിറാഅത്ത്</h2>
@@ -175,7 +174,7 @@
                         </div>
 
                         <!-- Dynamic Winners List -->
-                        <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full">
+                        <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full pr-16">
                             <!-- JS Injected Typography -->
                         </div>
 
