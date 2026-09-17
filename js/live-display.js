@@ -1,10 +1,8 @@
 import { db, doc, onSnapshot, collection, query, where } from './firebase.js';
 
-// Hardcoded Institute ID for zero-touch digital signage deployment
 const DEFAULT_INSTITUTE_ID = "XnTaWEgDWBqdODmxXGG4";
 const instId = DEFAULT_INSTITUTE_ID;
 
-// Target domain for the QR code to prompt user download instead of TV Screen
 const PUBLIC_DOMAIN_URL = "https://meelad-program.vercel.app/result.html"; 
 
 let dashboardData = null;
@@ -17,14 +15,13 @@ let slidesList = [];
 let currentSlideIndex = 0;
 let rotatorTimer = null;
 const ROTATION_DURATION = 9000;
-const ANNOUNCEMENT_DURATION = 30000; // 30 seconds per result
+const ANNOUNCEMENT_DURATION = 30000; 
 
 const announcementQueue = [];
 let isAnnouncing = false;
 const processedResultDocIds = new Set();
 let isFirstSync = true;
 
-// Premium palette for standard rotation screens
 const TEAM_PALETTES = [
     'linear-gradient(90deg, #0f5132, #198754)', 
     'linear-gradient(90deg, #b45309, #d97706)', 
@@ -34,18 +31,17 @@ const TEAM_PALETTES = [
 ];
 const teamColorMap = {};
 
-// Beautiful Monochromatic Gradients (95% dark to 60% light of unique hues)
 function getGradientForString(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
     const gradients = [
-        'linear-gradient(to bottom right, #450a0a, #dc2626)', // Cherry Red
-        'linear-gradient(to bottom right, #172554, #2563eb)', // Sapphire Blue
-        'linear-gradient(to bottom right, #052e16, #16a34a)', // Forest Green
-        'linear-gradient(to bottom right, #3b0764, #9333ea)', // Royal Purple
-        'linear-gradient(to bottom right, #431407, #ea580c)', // Terracotta Orange
-        'linear-gradient(to bottom right, #042f2e, #0d9488)', // Deep Teal
-        'linear-gradient(to bottom right, #4c0519, #e11d48)'  // Rose Pink
+        'linear-gradient(to bottom right, #450a0a, #dc2626)', 
+        'linear-gradient(to bottom right, #172554, #2563eb)', 
+        'linear-gradient(to bottom right, #052e16, #16a34a)', 
+        'linear-gradient(to bottom right, #3b0764, #9333ea)', 
+        'linear-gradient(to bottom right, #431407, #ea580c)', 
+        'linear-gradient(to bottom right, #042f2e, #0d9488)', 
+        'linear-gradient(to bottom right, #4c0519, #e11d48)'  
     ];
     return gradients[Math.abs(hash) % gradients.length];
 }
@@ -129,7 +125,6 @@ function processNextAnnouncement() {
     isAnnouncing = true;
     if (rotatorTimer) clearInterval(rotatorTimer);
 
-    // Hide Background UI
     document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
     if (normalTopHeader) normalTopHeader.style.opacity = '0';
     if (normalViewHeader) normalViewHeader.style.opacity = '0';
@@ -142,30 +137,38 @@ function processNextAnnouncement() {
 function renderPosterCard(res) {
     const overlay = document.getElementById('posterAnnouncementOverlay');
     
-    // Inject Gradient to Footer
+    // Inject Gradient
     const stableId = res.programId || res.id || 'default';
     const uniqueGradient = getGradientForString(stableId);
     document.getElementById('posterGradientFooter').style.background = uniqueGradient;
 
-    // ✅ FIXED: Strip redundant program code from the program name to prevent "03 03 Calligraphy"
-    let pCode = res.programCode ? String(res.programCode).padStart(2, '0') : '01';
+    // Advanced Program Code Extraction (Fixes "01 01 Nafeesath Mala")
+    let rawCode = res.programCode || res.programNumber || res.code || '';
     let pName = res.programName || 'Competition Program';
     
-    let rawCode = String(res.programCode || '').trim();
-    let paddedCode = rawCode.padStart(2, '0');
-    if (rawCode && pName.toLowerCase().startsWith(rawCode.toLowerCase())) {
-        pName = pName.substring(rawCode.length).trim();
-    } else if (paddedCode && pName.toLowerCase().startsWith(paddedCode.toLowerCase())) {
-        pName = pName.substring(paddedCode.length).trim();
+    if (!rawCode) {
+        const match = pName.trim().match(/^(\d+)/);
+        if (match) rawCode = match[1];
     }
-    if (pName.startsWith('-') || pName.startsWith(':')) pName = pName.substring(1).trim();
+    let pCode = rawCode ? String(rawCode).padStart(2, '0') : '--';
+
+    let cleanName = pName.trim();
+    if (rawCode) {
+        const paddedCode = String(rawCode).padStart(2, '0');
+        if (cleanName.toLowerCase().startsWith(String(rawCode).toLowerCase())) {
+            cleanName = cleanName.substring(String(rawCode).length).trim();
+        } else if (cleanName.toLowerCase().startsWith(paddedCode.toLowerCase())) {
+            cleanName = cleanName.substring(paddedCode.length).trim();
+        }
+    }
+    if (cleanName.startsWith('-') || cleanName.startsWith(':')) cleanName = cleanName.substring(1).trim();
 
     document.getElementById('posterCategory').textContent = res.categoryName || 'General';
     document.getElementById('posterProgCode').textContent = pCode;
-    document.getElementById('posterProgName').textContent = pName;
+    document.getElementById('posterProgName').textContent = cleanName;
     document.getElementById('posterQueueCounter').textContent = `Queue: ${announcementQueue.length + 1}`;
 
-    // Generate QR Code
+    // QR Code
     const programUrl = `${PUBLIC_DOMAIN_URL}?id=${instId}&prog=${stableId}`;
     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&format=svg&color=000000&bgcolor=ffffff&data=${encodeURIComponent(programUrl)}`;
     document.getElementById('posterQrImage').src = qrApiUrl;
@@ -180,12 +183,13 @@ function renderPosterCard(res) {
 
     const winnersContainer = document.getElementById('posterWinnersContainer');
     if (winnersList.length === 0) {
-        winnersContainer.innerHTML = `<div class="text-stone-500 font-bold py-6 text-xl pl-[70px]">Results finalized. Awaiting roster data.</div>`;
+        winnersContainer.innerHTML = `<div class="text-stone-500 font-bold py-6 text-xl text-center w-full">Results finalized. Awaiting roster data.</div>`;
     } else {
         const firstPlace = winnersList.filter(w => w.rank === 1);
         const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
 
-        let html = `<div class="flex flex-col gap-5 w-full pl-[75px] mt-2">`;
+        // Centered Wrapper for Beautiful Alignment
+        let html = `<div class="flex flex-col gap-5 w-[85%] mx-auto mt-4 pl-6">`;
 
         firstPlace.forEach(w => {
             html += `
