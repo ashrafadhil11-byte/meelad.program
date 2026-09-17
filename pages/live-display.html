@@ -170,28 +170,27 @@
              ───────────────────────────────────────────── -->
         <div id="posterAnnouncementOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/60 p-6">
             
-            <!-- 1:1 Aspect Ratio Card (Perfect Square) -->
             <div id="posterDynamicCard" class="poster-card-entrance relative w-[88vh] h-[88vh] aspect-square rounded-[2rem] shadow-2xl overflow-hidden flex flex-col bg-[#fdfbf7]">
                 
-                <!-- Background Decoration (RESULTS Watermark) safely constrained -->
-                <div class="absolute right-3 top-[30%] z-0 pointer-events-none select-none">
-                    <div class="vertical-results-watermark">RESULTS</div>
-                </div>
-
                 <!-- TOP SECTION: Light Beige Workspace -->
-                <div class="relative z-10 flex-1 flex flex-col px-10 pt-8 pb-4">
+                <div class="relative z-10 flex-1 flex flex-col px-10 pt-8 pb-4 overflow-hidden">
                     
+                    <!-- Watermark safely trapped inside the light area -->
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 z-0 pointer-events-none select-none">
+                        <div class="vertical-results-watermark">RESULTS</div>
+                    </div>
+
                     <!-- Header (Logos + Sweets of Madina) -->
-                    <div class="flex justify-between items-center mb-6 border-b border-stone-200 pb-4">
+                    <div class="relative z-10 flex justify-between items-center mb-6 border-b border-stone-200 pb-4">
                         <img src="../assets/icflgo.svg" alt="ICF" class="h-12 w-auto object-contain">
                         <span class="cinzel-font text-stone-800 text-xl font-black tracking-[0.25em] uppercase">
                             Sweets of Madina '26
                         </span>
-                        <div class="w-12 h-12 bg-stone-800 svg-mask" style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');"></div>
+                        <div class="w-16 h-16 bg-stone-800 svg-mask" style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');"></div>
                     </div>
 
                     <!-- Program Details -->
-                    <div class="flex items-center gap-5 mb-6">
+                    <div class="relative z-10 flex items-center gap-5 mb-6">
                         <div id="posterProgCode" class="mono-font text-6xl font-black text-stone-300">03</div>
                         <div class="flex flex-col border-l-[3px] border-amber-500 pl-5">
                             <span id="posterCategory" class="ml-font text-stone-500 font-bold uppercase tracking-widest text-[11px] mb-1">സീനിയർ</span>
@@ -200,13 +199,13 @@
                     </div>
 
                     <!-- Dynamic Winners List -->
-                    <div id="posterWinnersContainer" class="flex-1 flex flex-col justify-center z-10 w-full pr-16">
+                    <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full pr-16">
                         <!-- JS Injected Typography -->
                     </div>
                 </div>
 
-                <!-- BOTTOM SECTION: Dynamic Gradient (95% Top-Left to 60% Bottom-Right) -->
-                <div id="posterGradientFooter" class="h-[25%] w-full relative px-10 py-5 flex items-center justify-between text-white shadow-[inset_0_10px_20px_rgba(0,0,0,0.05)]">
+                <!-- BOTTOM SECTION: Dynamic Gradient Footer -->
+                <div id="posterGradientFooter" class="h-[25%] w-full relative px-10 py-5 flex items-center justify-between text-white shadow-[inset_0_10px_20px_rgba(0,0,0,0.05)] z-20">
                     
                     <!-- Left: Status & Progress -->
                     <div class="flex-1 max-w-[60%]">
@@ -232,7 +231,6 @@
                             <img id="posterQrImage" src="" alt="QR" class="w-16 h-16 object-contain rounded-lg mix-blend-multiply">
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
