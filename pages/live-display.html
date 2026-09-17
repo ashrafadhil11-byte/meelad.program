@@ -50,10 +50,7 @@
             box-shadow: 0 16px 36px -10px rgba(78, 52, 28, 0.08);
         }
 
-        /* 
-         * SVG Masking Class 
-         * This turns SVGs into single-color stamps that perfectly match the theme
-         */
+        /* SVG Masking Class for Campaign Logo */
         .svg-mask {
             -webkit-mask-size: contain;
             mask-size: contain;
@@ -94,18 +91,16 @@
     <div class="relative z-10 h-screen w-screen flex flex-col justify-between">
         
         <!-- TOP ZONE: Header + Metric Badges + Logos -->
-        <header class="px-10 pt-8 pb-4 flex items-start justify-between w-full">
+        <header class="px-10 pt-8 pb-4 flex items-center justify-between w-full">
             
             <!-- Left Header (Main Logo & Title) -->
-            <div class="flex items-center gap-5">
+            <div class="flex items-center gap-6">
                 
                 <!-- MAIN LOGO (ICFLGO) -->
-                <!-- Colored in deep Emerald Green to match the Mosque Dome -->
-                <div class="w-16 h-16 bg-emerald-900 svg-mask drop-shadow-sm" 
-                     style="-webkit-mask-image: url('../assets/icflgo.svg'); mask-image: url('../assets/icflgo.svg');">
-                </div>
+                <!-- Standard img tag to retain original colors, significantly enlarged (h-24 = 96px) -->
+                <img src="../assets/icflgo.svg" alt="ICF Logo" class="h-24 w-auto object-contain drop-shadow-md">
                 
-                <div>
+                <div class="mt-2">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-700/10 text-emerald-800 text-[11px] font-black tracking-widest uppercase border border-emerald-700/20">
                             <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span> LIVE BROADCAST
@@ -119,7 +114,7 @@
             </div>
 
             <!-- Right Header (Metrics & Campaign Logo) -->
-            <div class="flex items-center gap-8">
+            <div class="flex items-center gap-8 mt-2">
                 
                 <!-- Header Quick Metrics (Glass Pill) -->
                 <div class="glass-panel rounded-2xl px-6 py-2.5 flex items-center gap-8 border">
@@ -140,7 +135,7 @@
                 </div>
 
                 <!-- CAMPAIGN LOGO (QLB) -->
-                <!-- Colored in rich Amber to match the sandy background and gold accents -->
+                <!-- Kept with the amber tint mask to blend beautifully with the sand tones -->
                 <div class="w-16 h-16 bg-amber-700/90 svg-mask drop-shadow-md" 
                      style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');">
                 </div>
