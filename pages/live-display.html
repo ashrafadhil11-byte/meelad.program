@@ -71,6 +71,23 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
+        /* Announcement Takeover Animation */
+        .announce-active {
+            display: flex !important;
+            animation: cinematicPop 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .announce-exit {
+            animation: cinematicFadeOut 0.6s ease-in forwards;
+        }
+        @keyframes cinematicPop {
+            0% { opacity: 0; transform: scale(0.9) translateY(30px); filter: blur(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
+        @keyframes cinematicFadeOut {
+            0% { opacity: 1; transform: scale(1); filter: blur(0); }
+            100% { opacity: 0; transform: scale(1.05); filter: blur(10px); }
+        }
+
         /* Continuous Bottom Ticker */
         .marquee-track {
             display: flex;
@@ -96,9 +113,8 @@
             <!-- Left Header (Main Logo & Title) -->
             <div class="flex items-center gap-6">
                 
-                <!-- MAIN LOGO (ICFLGO) -->
-                <!-- Standard img tag to retain original colors, significantly enlarged (h-24 = 96px) -->
-                <img src="../assets/icflgo.svg" alt="ICF Logo" class="h-24 w-auto object-contain drop-shadow-md">
+                <!-- MAIN LOGO (ICFLGO) Adjusted to h-16 for better balance -->
+                <img src="../assets/icflgo.svg" alt="ICF Logo" class="h-16 w-auto object-contain drop-shadow-md">
                 
                 <div class="mt-2">
                     <div class="flex items-center gap-2 mb-1">
@@ -116,7 +132,6 @@
             <!-- Right Header (Metrics & Campaign Logo) -->
             <div class="flex items-center gap-8 mt-2">
                 
-                <!-- Header Quick Metrics (Glass Pill) -->
                 <div class="glass-panel rounded-2xl px-6 py-2.5 flex items-center gap-8 border">
                     <div class="text-left">
                         <div class="text-[10px] uppercase tracking-widest font-black text-stone-500">Programs</div>
@@ -134,55 +149,57 @@
                     </div>
                 </div>
 
-                <!-- CAMPAIGN LOGO (QLB) -->
-                <!-- Kept with the amber tint mask to blend beautifully with the sand tones -->
                 <div class="w-16 h-16 bg-amber-700/90 svg-mask drop-shadow-md" 
                      style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');">
                 </div>
-
             </div>
         </header>
 
         <!-- MIDDLE ZONE: Content on Left (60% width), Dome Free on Right -->
-        <main class="flex-1 px-10 py-2 flex flex-col justify-center max-w-[62vw]">
+        <main class="flex-1 px-10 py-2 flex flex-col justify-center max-w-[62vw] relative">
             
+            <!-- NEW RESULT CINEMATIC TAKEOVER (Hidden by default) -->
+            <div id="newResultOverlay" class="absolute inset-0 z-50 hidden flex-col items-center justify-center bg-stone-900/80 backdrop-blur-xl rounded-3xl border-2 border-amber-500/40 p-10 text-center shadow-[0_0_60px_rgba(197,155,39,0.3)] mx-4 my-2">
+                <div class="text-amber-500 font-black tracking-widest uppercase text-xs mb-3 animate-pulse flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> JUST ANNOUNCED
+                </div>
+                <h2 id="announceProgramName" class="cinzel-font text-4xl font-black text-white mb-3">Program Name</h2>
+                <div id="announceCategory" class="inline-block px-4 py-1 bg-stone-800 text-amber-400 border border-amber-500/20 text-xs font-bold rounded-full mb-8 uppercase tracking-widest">Category</div>
+                
+                <div class="w-full max-w-md bg-white/5 border border-white/10 rounded-2xl p-6 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-7xl opacity-10">🥇</div>
+                    <div class="text-stone-400 text-[10px] uppercase tracking-widest font-bold mb-1">First Place Winner</div>
+                    <h3 id="announceWinner" class="text-3xl font-black text-emerald-400 mb-1 drop-shadow-md">Winner Name</h3>
+                    <div id="announceTeam" class="text-lg font-bold text-stone-300 uppercase tracking-wide">Team Name</div>
+                </div>
+            </div>
+
             <!-- Rotating View Header Indicator -->
-            <div class="flex items-center justify-between mb-4 px-1">
+            <div class="flex items-center justify-between mb-4 px-1 opacity-100 transition-opacity duration-300" id="normalViewHeader">
                 <div class="flex items-center gap-3">
                     <span id="viewTitle" class="cinzel-font text-2xl font-black uppercase text-stone-800 tracking-wider">Overall Standings</span>
                     <span id="viewCategoryBadge" class="hidden text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-900 border border-amber-500/30"></span>
                 </div>
-                <!-- Progress Line Timer -->
                 <div class="w-36 h-1.5 bg-stone-300/60 rounded-full overflow-hidden">
                     <div id="rotatorProgressFill" class="h-full bg-emerald-700 w-0"></div>
                 </div>
             </div>
 
-            <!-- VIEW 1: Team Standings List -->
             <div id="screenTeamChampionship" class="screen-view active flex-col w-full">
-                <div id="teamChampionshipGrid" class="space-y-2.5">
-                    <!-- Dynamic Team Rows -->
-                </div>
+                <div id="teamChampionshipGrid" class="space-y-2.5"></div>
             </div>
 
-            <!-- VIEW 2: Category Leaders Hero -->
             <div id="screenCategoryLeaders" class="screen-view flex-col w-full">
-                <div id="categoryLeadersContainer" class="w-full">
-                    <!-- Dynamic Leader Spotlight -->
-                </div>
+                <div id="categoryLeadersContainer" class="w-full"></div>
             </div>
 
-            <!-- VIEW 3: Category Breakdown -->
             <div id="screenCategoryComparison" class="screen-view flex-col w-full">
-                <div id="categoryComparisonContainer" class="space-y-2 w-full">
-                    <!-- Dynamic Category Comparison List -->
-                </div>
+                <div id="categoryComparisonContainer" class="space-y-2 w-full"></div>
             </div>
         </main>
 
         <!-- BOTTOM ZONE: Sponsors & Results Ticker -->
         <footer class="w-full flex flex-col">
-            <!-- Sponsor Strip -->
             <div class="px-10 py-2 flex items-center justify-between">
                 <div class="flex items-center gap-6">
                     <span class="text-[10px] font-black uppercase tracking-widest text-stone-500">Official Sponsors</span>
@@ -193,7 +210,6 @@
                 </div>
             </div>
 
-            <!-- Continuous Ticker Bar -->
             <div class="h-11 bg-stone-900 text-stone-100 flex items-center overflow-hidden shadow-lg border-t border-amber-600/30">
                 <div class="h-full px-5 bg-amber-600 text-stone-950 font-black text-xs uppercase tracking-widest flex items-center gap-2 flex-shrink-0 z-10 shadow-md">
                     <span>🔥</span> RESULTS
