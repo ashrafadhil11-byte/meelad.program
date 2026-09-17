@@ -10,8 +10,6 @@
         :root {
             --sand-bg: #f5ebe1;
             --text-dark: #1e1b18;
-            --emerald-accent: #0f5132;
-            --gold-accent: #c59b27;
             --glass-bg: rgba(255, 255, 255, 0.76);
             --glass-border: rgba(210, 185, 155, 0.45);
         }
@@ -29,91 +27,54 @@
         .mono-font { font-family: 'JetBrains Mono', monospace; }
         .ml-font { font-family: 'Anek Malayalam', 'Manjari', sans-serif; }
 
-        /* Fullscreen Madinah Background */
         .bg-canvas {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0;
+            position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0;
             background: url('../assets/MLDBGLND.png'), url('../assets/MLDBG.svg'), #f5ebe1;
-            background-size: cover;
-            background-position: right bottom;
-            background-repeat: no-repeat;
+            background-size: cover; background-position: right bottom; background-repeat: no-repeat;
         }
 
         .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 16px 36px -10px rgba(78, 52, 28, 0.08);
+            background: var(--glass-bg); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--glass-border); box-shadow: 0 16px 36px -10px rgba(78, 52, 28, 0.08);
         }
 
         .svg-mask {
-            -webkit-mask-size: contain;
-            mask-size: contain;
-            -webkit-mask-position: center;
-            mask-position: center;
-            -webkit-mask-repeat: no-repeat;
-            mask-repeat: no-repeat;
+            -webkit-mask-size: contain; mask-size: contain;
+            -webkit-mask-position: center; mask-position: center;
+            -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
         }
 
         /* Screen Rotator Views */
         .screen-view { display: none; opacity: 0; }
-        .screen-view.active {
-            display: flex;
-            animation: modernFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+        .screen-view.active { display: flex; animation: modernFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes modernFadeIn {
             from { opacity: 0; transform: translateY(12px) scale(0.99); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* Poster Announcement Transitions */
-        .poster-active {
-            display: flex !important;
-            animation: posterEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .poster-exit {
-            animation: posterExitAnim 0.5s ease-in forwards;
-        }
-        @keyframes posterEntrance {
-            0% { opacity: 0; transform: scale(0.94) translateY(24px); filter: blur(8px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
-        }
-        @keyframes posterExitAnim {
-            0% { opacity: 1; transform: scale(1); filter: blur(0); }
-            100% { opacity: 0; transform: scale(1.03) translateY(-12px); filter: blur(8px); }
+        /* NEW: Cinematic Full-Screen Takeover */
+        .poster-overlay-active { display: flex !important; animation: fadeInOverlay 0.5s ease forwards; }
+        .poster-overlay-exit { animation: fadeOutOverlay 0.6s ease forwards; }
+        
+        @keyframes fadeInOverlay { from { opacity: 0; backdrop-filter: blur(0px); } to { opacity: 1; backdrop-filter: blur(12px); } }
+        @keyframes fadeOutOverlay { from { opacity: 1; backdrop-filter: blur(12px); } to { opacity: 0; backdrop-filter: blur(0px); } }
+
+        /* NEW: The Dynamic Card Entrance */
+        .poster-card-entrance { animation: cardPop 0.8s cubic-bezier(0.2, 1.2, 0.3, 1) forwards; }
+        @keyframes cardPop {
+            0% { opacity: 0; transform: scale(0.8) translateY(40px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        /* Vertical Outline 'RESULTS' Stamp */
+        /* Watermark */
         .vertical-results-watermark {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            font-size: 5rem;
-            font-weight: 900;
-            letter-spacing: 0.18em;
-            color: transparent;
-            -webkit-text-stroke: 1.5px rgba(197, 155, 39, 0.35);
+            writing-mode: vertical-rl; text-orientation: mixed;
+            font-size: 8rem; font-weight: 900; letter-spacing: 0.1em;
+            color: transparent; -webkit-text-stroke: 2px rgba(255, 255, 255, 0.15);
         }
 
-        /* Rank Badge Circles */
-        .rank-circle-gold {
-            background: linear-gradient(135deg, #d4a340, #9e7116);
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(158, 113, 22, 0.35);
-        }
-
-        .marquee-track {
-            display: flex;
-            white-space: nowrap;
-            animation: marqueeSlide 30s linear infinite;
-        }
-        @keyframes marqueeSlide {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
+        .marquee-track { display: flex; white-space: nowrap; animation: marqueeSlide 30s linear infinite; }
+        @keyframes marqueeSlide { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
     </style>
 </head>
 <body class="h-screen w-screen relative">
@@ -122,10 +83,9 @@
     <div class="relative z-10 h-screen w-screen flex flex-col justify-between">
         
         <!-- TOP ZONE: Header Bar -->
-        <header class="px-10 pt-7 pb-3 flex items-center justify-between w-full">
+        <header class="px-10 pt-7 pb-3 flex items-center justify-between w-full transition-opacity duration-500" id="normalTopHeader">
             <div class="flex items-center gap-5">
                 <img src="../assets/icflgo.svg" alt="Main Logo" class="h-16 w-auto object-contain drop-shadow-md">
-                
                 <div class="mt-1">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-700/10 text-emerald-800 text-[11px] font-black tracking-widest uppercase border border-emerald-700/20">
@@ -133,9 +93,7 @@
                         </span>
                         <span id="statLastUpdated" class="text-xs text-stone-500 font-semibold tracking-wide">Syncing...</span>
                     </div>
-                    <h1 id="liveMeeladName" class="cinzel-font text-3xl font-black tracking-tight text-stone-900 leading-none">
-                        MEELAD CHAMPIONSHIP
-                    </h1>
+                    <h1 id="liveMeeladName" class="cinzel-font text-3xl font-black tracking-tight text-stone-900 leading-none">MEELAD CHAMPIONSHIP</h1>
                 </div>
             </div>
 
@@ -156,71 +114,15 @@
                         <div id="statPendingProg" class="mono-font text-lg font-bold text-stone-700">-</div>
                     </div>
                 </div>
-
-                <div class="w-14 h-14 bg-amber-700/90 svg-mask drop-shadow-md" 
-                     style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');">
-                </div>
+                <div class="w-14 h-14 bg-amber-700/90 svg-mask drop-shadow-md" style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');"></div>
             </div>
         </header>
 
-        <!-- MIDDLE ZONE: Content Area on Left -->
+        <!-- MIDDLE ZONE: Main Viewport -->
         <main class="flex-1 px-10 py-1 flex flex-col justify-center max-w-[62vw] relative">
             
-            <!-- ─────────────────────────────────────────────
-                 POSTER TAKEOVER OVERLAY (30 SECONDS EACH)
-                 ───────────────────────────────────────────── -->
-            <div id="posterAnnouncementOverlay" class="absolute inset-0 z-50 hidden flex-col justify-between glass-panel rounded-3xl p-7 border-2 border-amber-600/40 shadow-2xl overflow-hidden my-1">
-                
-                <!-- Background Vertical RESULTS Text -->
-                <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none z-0">
-                    <div class="vertical-results-watermark">RESULTS</div>
-                </div>
-
-                <!-- Top: Badge + Category + Program Title -->
-                <div class="relative z-10">
-                    <div class="flex items-center justify-between border-b border-stone-300/80 pb-3 mb-4">
-                        <div class="flex items-center gap-4">
-                            <span class="px-3 py-1 rounded-full bg-amber-600 text-stone-950 font-black text-xs tracking-widest uppercase shadow-sm">
-                                📢 JUST ANNOUNCED
-                            </span>
-                            <span id="posterCategory" class="ml-font text-base font-bold text-stone-600">സീനിയർ</span>
-                        </div>
-                        <div id="posterQueueCounter" class="text-xs font-mono font-bold text-stone-500 bg-stone-200/80 px-2.5 py-1 rounded-full">
-                            1 / 1
-                        </div>
-                    </div>
-
-                    <div class="flex items-center gap-5">
-                        <div id="posterProgCode" class="mono-font text-4xl font-black text-stone-800 border-2 border-stone-800/20 px-3.5 py-1 rounded-2xl bg-white/50">
-                            03
-                        </div>
-                        <div>
-                            <h2 id="posterProgName" class="ml-font text-3xl md:text-4xl font-extrabold text-stone-900 tracking-tight leading-tight">
-                                ഖിറാഅത്ത്
-                            </h2>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Middle: Position Winners List (1, 2, 3) -->
-                <div id="posterWinnersContainer" class="relative z-10 space-y-3.5 my-auto max-w-[85%]">
-                    <!-- Populated dynamically via JS -->
-                </div>
-
-                <!-- Bottom: 30-Second Countdown Progress Bar -->
-                <div class="relative z-10 pt-2 border-t border-stone-200">
-                    <div class="flex justify-between items-center text-[10px] font-mono uppercase font-bold text-stone-500 mb-1.5">
-                        <span>Result Broadcast Window</span>
-                        <span id="posterTimerSec">30s</span>
-                    </div>
-                    <div class="w-full h-1.5 bg-stone-300/60 rounded-full overflow-hidden">
-                        <div id="posterTimeFill" class="h-full bg-amber-600 w-0"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Normal Slides Header Indicator -->
-            <div class="flex items-center justify-between mb-4 px-1" id="normalViewHeader">
+            <!-- Normal Slides Header -->
+            <div class="flex items-center justify-between mb-4 px-1 transition-opacity duration-500" id="normalViewHeader">
                 <div class="flex items-center gap-3">
                     <span id="viewTitle" class="cinzel-font text-2xl font-black uppercase text-stone-800 tracking-wider">Overall Standings</span>
                     <span id="viewCategoryBadge" class="hidden text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-900 border border-amber-500/30"></span>
@@ -234,18 +136,16 @@
             <div id="screenTeamChampionship" class="screen-view active flex-col w-full">
                 <div id="teamChampionshipGrid" class="space-y-2.5"></div>
             </div>
-
             <div id="screenCategoryLeaders" class="screen-view flex-col w-full">
                 <div id="categoryLeadersContainer" class="w-full"></div>
             </div>
-
             <div id="screenCategoryComparison" class="screen-view flex-col w-full">
                 <div id="categoryComparisonContainer" class="space-y-2 w-full"></div>
             </div>
         </main>
 
-        <!-- BOTTOM ZONE: Sponsors + Marquee Ribbon -->
-        <footer class="w-full flex flex-col">
+        <!-- BOTTOM ZONE -->
+        <footer class="w-full flex flex-col transition-opacity duration-500" id="normalFooter">
             <div class="px-10 py-1.5 flex items-center justify-between">
                 <div class="flex items-center gap-6">
                     <span class="text-[10px] font-black uppercase tracking-widest text-stone-500">Official Sponsors</span>
@@ -255,7 +155,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="h-11 bg-stone-900 text-stone-100 flex items-center overflow-hidden shadow-lg border-t border-amber-600/30">
                 <div class="h-full px-5 bg-amber-600 text-stone-950 font-black text-xs uppercase tracking-widest flex items-center gap-2 flex-shrink-0 z-10 shadow-md">
                     <span>🔥</span> RESULTS
@@ -268,6 +167,84 @@
             </div>
         </footer>
 
+        <!-- ─────────────────────────────────────────────
+             THE NEW DYNAMIC POSTER OVERLAY (FULLSCREEN TAKEOVER)
+             ───────────────────────────────────────────── -->
+        <div id="posterAnnouncementOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/40 p-10">
+            
+            <!-- The Card Frame (Dynamic Gradient Injected Here via JS) -->
+            <div id="posterDynamicCard" class="poster-card-entrance relative w-full max-w-5xl h-[85vh] rounded-[2.5rem] shadow-[0_25px_60px_-12px_rgba(0,0,0,0.5)] border border-white/30 overflow-hidden flex flex-col">
+                
+                <!-- Background Decoration (RESULTS Watermark) -->
+                <div class="absolute right-4 top-1/2 -translate-y-1/2 z-0 pointer-events-none">
+                    <div class="vertical-results-watermark">RESULTS</div>
+                </div>
+
+                <!-- Card Content Layer -->
+                <div class="relative z-10 flex flex-col h-full p-10">
+                    
+                    <!-- 1. Beautiful Header (Logos + Sweets of Madina) -->
+                    <div class="flex justify-between items-center mb-8 pb-6 border-b border-white/20">
+                        <!-- Main Logo (Keep full color svg via img tag) -->
+                        <img src="../assets/icflgo.svg" alt="ICF" class="h-14 w-auto object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]">
+                        
+                        <!-- Center Title -->
+                        <div class="text-center">
+                            <span class="cinzel-font text-white text-2xl font-black tracking-[0.25em] uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]">
+                                Sweets of Madina '26
+                            </span>
+                        </div>
+                        
+                        <!-- Campaign Logo (White Mask) -->
+                        <div class="w-16 h-16 bg-white svg-mask drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]" style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');"></div>
+                    </div>
+
+                    <!-- 2. Program Details -->
+                    <div class="flex items-center gap-6 mb-8">
+                        <div id="posterProgCode" class="mono-font text-6xl font-black text-white drop-shadow-md">03</div>
+                        <div class="flex flex-col border-l-2 border-white/30 pl-6">
+                            <span id="posterCategory" class="ml-font text-white/80 font-bold uppercase tracking-widest text-sm mb-1">സീനിയർ</span>
+                            <h2 id="posterProgName" class="ml-font text-4xl font-black text-white tracking-wide drop-shadow-md leading-none">ഖിറാഅത്ത്</h2>
+                        </div>
+                    </div>
+
+                    <!-- 3. Dynamic Winners List (Glassmorphism) -->
+                    <div id="posterWinnersContainer" class="flex-1 space-y-4 max-w-3xl z-10">
+                        <!-- JS Injected Glass Winners -->
+                    </div>
+
+                    <!-- 4. Footer: QR Code & Timer -->
+                    <div class="mt-auto pt-6 border-t border-white/20 flex justify-between items-end">
+                        
+                        <!-- Timer & Queue -->
+                        <div class="w-1/2">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="px-3 py-1 rounded-full bg-black/30 text-white font-bold text-[10px] tracking-widest uppercase backdrop-blur-sm border border-white/10">
+                                    <span class="inline-block w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse mr-1"></span> LIVE RESULT
+                                </span>
+                                <span id="posterQueueCounter" class="text-[10px] font-mono text-white/70 uppercase">Queue: 1/1</span>
+                            </div>
+                            <div class="w-full h-1 bg-black/20 rounded-full overflow-hidden">
+                                <div id="posterTimeFill" class="h-full bg-white transition-all"></div>
+                            </div>
+                        </div>
+
+                        <!-- QR Code Block -->
+                        <div class="flex items-center gap-4 bg-black/20 backdrop-blur-md border border-white/10 p-3 rounded-2xl">
+                            <div class="text-right flex flex-col justify-center">
+                                <span class="text-white font-black text-sm uppercase tracking-wide">Save this Result</span>
+                                <span class="text-white/70 text-[10px] font-medium tracking-widest uppercase">Scan to Download Poster</span>
+                            </div>
+                            <div class="bg-white p-1.5 rounded-xl shadow-lg">
+                                <!-- QR Image will be injected via JS API -->
+                                <img id="posterQrImage" src="" alt="QR" class="w-16 h-16 object-contain rounded-lg">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="../js/live-display.js"></script>
