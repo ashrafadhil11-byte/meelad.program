@@ -3,8 +3,8 @@ import { db, doc, onSnapshot, collection, query, where } from './firebase.js';
 const DEFAULT_INSTITUTE_ID = "XnTaWEgDWBqdODmxXGG4";
 const instId = DEFAULT_INSTITUTE_ID;
 
-// Target domain for the QR code download link
-const PUBLIC_DOMAIN_URL = "https://meelad-program.vercel.app/pages/live-display.html?id=XnTaWEgDWBqdODmxXGG4"; 
+// Target domain for the QR code to prompt user download instead of TV Screen
+const PUBLIC_DOMAIN_URL = "https://meelad-program.vercel.app/result.html"; 
 
 let dashboardData = null;
 let eventConfig = null;
@@ -16,7 +16,7 @@ let slidesList = [];
 let currentSlideIndex = 0;
 let rotatorTimer = null;
 const ROTATION_DURATION = 9000;
-const ANNOUNCEMENT_DURATION = 30000; // 30 seconds
+const ANNOUNCEMENT_DURATION = 30000; // 30 seconds per result
 
 const announcementQueue = [];
 let isAnnouncing = false;
@@ -32,18 +32,18 @@ const TEAM_PALETTES = [
 ];
 const teamColorMap = {};
 
-// Beautiful Monochromatic Gradients (40% light to 90% dark of the SAME color)
+// 95% Dark (Top Left) fading to 60% Light (Bottom Right) of unique hues
 function getGradientForString(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
     const gradients = [
-        'linear-gradient(to bottom, #ffb5a7, #7a0016)', // Cherry Blossom / Deep Crimson
-        'linear-gradient(to bottom, #aed9e0, #003d5b)', // Sky Teal / Deep Ocean
-        'linear-gradient(to bottom, #d8e2dc, #1b4332)', // Sage Mint / Very Dark Forest
-        'linear-gradient(to bottom, #e0aaff, #3c096c)', // Soft Lilac / Midnight Violet
-        'linear-gradient(to bottom, #fcd5ce, #6a040f)', // Peach Coral / Deep Terracotta
-        'linear-gradient(to bottom, #c2c5aa, #333d29)', // Muted Olive / Deep Moss
-        'linear-gradient(to bottom, #a2d2ff, #03045e)'  // Ice Blue / Abyss Navy
+        'linear-gradient(to bottom right, #450a0a, #dc2626)', // Cherry Red
+        'linear-gradient(to bottom right, #172554, #2563eb)', // Sapphire Blue
+        'linear-gradient(to bottom right, #052e16, #16a34a)', // Forest Green
+        'linear-gradient(to bottom right, #3b0764, #9333ea)', // Royal Purple
+        'linear-gradient(to bottom right, #431407, #ea580c)', // Terracotta Orange
+        'linear-gradient(to bottom right, #042f2e, #0d9488)', // Deep Teal
+        'linear-gradient(to bottom right, #4c0519, #e11d48)'  // Rose Pink
     ];
     return gradients[Math.abs(hash) % gradients.length];
 }
@@ -94,7 +94,7 @@ function updateHeader() {
 }
 
 // ─────────────────────────────────────────────
-// DYNAMIC POSTER ENGINE (BEIGE TOP + GRADIENT BOTTOM)
+// DYNAMIC POSTER ENGINE (1:1 Ratio Square)
 // ─────────────────────────────────────────────
 function queueResultAnnouncement(resultData) {
     announcementQueue.push(resultData);
@@ -127,7 +127,6 @@ function processNextAnnouncement() {
     isAnnouncing = true;
     if (rotatorTimer) clearInterval(rotatorTimer);
 
-    // Hide Background UI
     document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
     if (normalTopHeader) normalTopHeader.style.opacity = '0';
     if (normalViewHeader) normalViewHeader.style.opacity = '0';
@@ -140,22 +139,22 @@ function processNextAnnouncement() {
 function renderPosterCard(res) {
     const overlay = document.getElementById('posterAnnouncementOverlay');
     
-    // 1. Inject Gradient to Footer Only
+    // Inject Gradient to Footer (95% Top Left -> 60% Bottom Right)
     const uniqueGradient = getGradientForString(res.programName || res.id || 'default');
     document.getElementById('posterGradientFooter').style.background = uniqueGradient;
 
-    // 2. Populate Text
+    // Populate Text
     document.getElementById('posterCategory').textContent = res.categoryName || 'General';
     document.getElementById('posterProgCode').textContent = res.programCode ? String(res.programCode).padStart(2, '0') : '01';
     document.getElementById('posterProgName').textContent = res.programName || 'Competition Program';
     document.getElementById('posterQueueCounter').textContent = `Queue: ${announcementQueue.length + 1}`;
 
-    // 3. Generate QR Code via API
-    const programUrl = `${PUBLIC_DOMAIN_URL}&prog=${res.programId || res.id}`;
+    // Generate QR Code via API to Dedicated Result Webpage
+    const programUrl = `${PUBLIC_DOMAIN_URL}?id=${instId}&prog=${res.programId || res.id}`;
     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&format=svg&color=000000&bgcolor=ffffff&data=${encodeURIComponent(programUrl)}`;
     document.getElementById('posterQrImage').src = qrApiUrl;
 
-    // 4. Extract Winners (1st, 2nd, 3rd)
+    // Extract Winners (1st, 2nd, 3rd)
     let winnersList = [];
     if (Array.isArray(res.marksData) && res.marksData.length > 0) {
         winnersList = [...res.marksData].filter(m => m.rank && m.rank <= 3).sort((a, b) => a.rank - b.rank);
@@ -167,49 +166,47 @@ function renderPosterCard(res) {
     if (winnersList.length === 0) {
         winnersContainer.innerHTML = `<div class="text-stone-500 font-bold py-6 text-xl">Results finalized. Awaiting roster data.</div>`;
     } else {
-        // Group winners
         const firstPlace = winnersList.filter(w => w.rank === 1);
         const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
 
-        let html = `<div class="flex flex-col gap-6 w-full">`;
+        let html = `<div class="flex flex-col gap-4 w-full">`;
 
-        // BIG First Place Display
+        // First Place Display (Massive text)
         firstPlace.forEach(w => {
             html += `
-            <div class="flex items-center gap-7">
-                <div class="text-7xl text-amber-500 font-black drop-shadow-sm flex-shrink-0">1</div>
-                <div>
-                    <div class="ml-font text-5xl font-black text-stone-900 leading-tight mb-1 truncate max-w-2xl">
+            <div class="flex items-center gap-6">
+                <div class="text-6xl text-amber-500 font-black drop-shadow-sm flex-shrink-0">1</div>
+                <div class="min-w-0">
+                    <div class="ml-font text-4xl font-black text-stone-900 leading-tight mb-1 truncate">
                         ${escapeHTML(w.studentName || w.name || 'Candidate')}
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="text-sm font-bold uppercase tracking-widest text-stone-500">${escapeHTML(w.teamName || w.team || 'Team')}</span>
-                        ${w.grade ? `<span class="bg-stone-200 text-stone-600 px-2 py-0.5 rounded text-xs font-mono font-bold">Grade: ${escapeHTML(w.grade)}</span>` : ''}
+                        <span class="text-xs font-bold uppercase tracking-widest text-stone-500">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                        ${w.grade ? `<span class="bg-stone-200 text-stone-600 px-2 py-0.5 rounded text-[10px] font-mono font-bold">Grade: ${escapeHTML(w.grade)}</span>` : ''}
                     </div>
                 </div>
             </div>`;
         });
 
-        // Smaller, Stacked 2nd & 3rd Place Display
+        // 2nd & 3rd Place Display (Smaller)
         if (runnersUp.length > 0) {
-            html += `<div class="flex flex-col gap-5 mt-3 pl-2">`;
+            html += `<div class="flex flex-col gap-4 mt-2 pl-2">`;
             runnersUp.forEach(w => {
                 html += `
                 <div class="flex items-center gap-5">
-                    <div class="text-4xl text-stone-300 font-black w-8 text-center flex-shrink-0">${w.rank}</div>
-                    <div>
-                        <div class="ml-font text-3xl font-bold text-stone-700 leading-none mb-1 truncate max-w-xl">
+                    <div class="text-3xl text-stone-300 font-black w-8 text-center flex-shrink-0">${w.rank}</div>
+                    <div class="min-w-0">
+                        <div class="ml-font text-2xl font-bold text-stone-700 leading-none mb-1 truncate">
                             ${escapeHTML(w.studentName || w.name || 'Candidate')}
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold uppercase tracking-widest text-stone-400">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400">${escapeHTML(w.teamName || w.team || 'Team')}</span>
                         </div>
                     </div>
                 </div>`;
             });
             html += `</div>`;
         }
-
         html += `</div>`;
         winnersContainer.innerHTML = html;
     }
