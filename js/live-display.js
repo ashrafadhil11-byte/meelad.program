@@ -1,4 +1,4 @@
-import { db, doc, onSnapshot } from './firebase.js';
+import { db, doc, onSnapshot, collection, query, where } from './firebase.js';
 
 const DEFAULT_INSTITUTE_ID = "XnTaWEgDWBqdODmxXGG4";
 const instId = DEFAULT_INSTITUTE_ID;
@@ -12,8 +12,14 @@ let latestPublishedResults = [];
 let slidesList = [];
 let currentSlideIndex = 0;
 let rotatorTimer = null;
-let lastAnnouncedResultId = null; // Tracks the newest result to trigger the announcement
-const ROTATION_DURATION = 9000; 
+const ROTATION_DURATION = 9000;
+const ANNOUNCEMENT_DURATION = 30000; // Exactly 30 seconds per published item
+
+// Queue Management for Results
+const announcementQueue = [];
+let isAnnouncing = false;
+const processedResultDocIds = new Set();
+let isFirstSync = true;
 
 const TEAM_PALETTES = [
     'linear-gradient(90deg, #0f5132, #198754)', 
@@ -23,6 +29,13 @@ const TEAM_PALETTES = [
     'linear-gradient(90deg, #9f1239, #e11d48)'  
 ];
 const teamColorMap = {};
+
+function escapeHTML(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
 
 function formatTimeAMPM(timestamp) {
     const date = timestamp ? new Date(timestamp) : new Date();
@@ -67,42 +80,137 @@ function updateHeader() {
     }
 }
 
-// Cinematic New Result Announcement
-function triggerNewResultAnnouncement(result) {
-    // Pause standard rotation
-    if (rotatorTimer) clearInterval(rotatorTimer);
-
-    const overlay = document.getElementById('newResultOverlay');
-    const headerEl = document.getElementById('normalViewHeader');
-    
-    // Hide active screens
-    document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
-    headerEl.style.opacity = '0';
-
-    // Populate data
-    document.getElementById('announceProgramName').textContent = result.programName || 'Competition Event';
-    document.getElementById('announceCategory').textContent = result.categoryName || 'General';
-    document.getElementById('announceWinner').textContent = result.winnerName || 'Winner Declared';
-    document.getElementById('announceTeam').textContent = result.winningTeam || '';
-
-    // Trigger Entrance Animation
-    overlay.classList.remove('hidden', 'announce-exit');
-    overlay.classList.add('announce-active');
-
-    // Hold for 12 seconds, then dismiss and resume normal rotation
-    setTimeout(() => {
-        overlay.classList.remove('announce-active');
-        overlay.classList.add('announce-exit');
-        
-        setTimeout(() => {
-            overlay.classList.add('hidden');
-            headerEl.style.opacity = '1';
-            displayCurrentSlide(); // Resume immediately
-            startAutoRotation();
-        }, 600); // Wait for exit animation to finish
-    }, 12000);
+// ─────────────────────────────────────────────
+// POSTER TAKEOVER ENGINE (30 SEC QUEUE HANDLER)
+// ─────────────────────────────────────────────
+function queueResultAnnouncement(resultData) {
+    announcementQueue.push(resultData);
+    if (!isAnnouncing) {
+        processNextAnnouncement();
+    }
 }
 
+function processNextAnnouncement() {
+    if (announcementQueue.length === 0) {
+        isAnnouncing = false;
+        const overlay = document.getElementById('posterAnnouncementOverlay');
+        const normalHeader = document.getElementById('normalViewHeader');
+        
+        overlay.classList.remove('poster-active');
+        overlay.classList.add('poster-exit');
+
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('poster-exit');
+            if (normalHeader) normalHeader.style.opacity = '1';
+            displayCurrentSlide();
+            startAutoRotation();
+        }, 500);
+        return;
+    }
+
+    isAnnouncing = true;
+    if (rotatorTimer) clearInterval(rotatorTimer);
+
+    const currentResult = announcementQueue.shift();
+    renderPosterCard(currentResult);
+}
+
+function renderPosterCard(res) {
+    const overlay = document.getElementById('posterAnnouncementOverlay');
+    const normalHeader = document.getElementById('normalViewHeader');
+    
+    document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+    if (normalHeader) normalHeader.style.opacity = '0';
+
+    // Populate Program Information
+    document.getElementById('posterCategory').textContent = res.categoryName || 'General';
+    document.getElementById('posterProgCode').textContent = res.programCode ? String(res.programCode).padStart(2, '0') : '01';
+    document.getElementById('posterProgName').textContent = res.programName || 'Competition Program';
+    document.getElementById('posterQueueCounter').textContent = `Remaining in Queue: ${announcementQueue.length + 1}`;
+
+    // Extract Ranks 1, 2, 3
+    let winnersList = [];
+    if (Array.isArray(res.marksData) && res.marksData.length > 0) {
+        const sorted = [...res.marksData]
+            .filter(m => m.rank && m.rank <= 3)
+            .sort((a, b) => a.rank - b.rank);
+        winnersList = sorted.map(w => ({
+            rank: w.rank,
+            name: w.studentName || w.name || 'Candidate',
+            team: w.teamName || '',
+            grade: w.grade || ''
+        }));
+    } else if (Array.isArray(res.winners) && res.winners.length > 0) {
+        const sorted = [...res.winners]
+            .filter(w => w.rank && w.rank <= 3)
+            .sort((a, b) => a.rank - b.rank);
+        winnersList = sorted.map(w => ({
+            rank: w.rank,
+            name: w.studentName || w.name || 'Candidate',
+            team: w.teamName || '',
+            grade: w.grade || ''
+        }));
+    }
+
+    const winnersContainer = document.getElementById('posterWinnersContainer');
+    if (winnersList.length === 0) {
+        winnersContainer.innerHTML = `<div class="text-stone-500 font-bold py-6">Results announced. Awaiting winner roster.</div>`;
+    } else {
+        winnersContainer.innerHTML = winnersList.map(w => `
+            <div class="flex items-center gap-5 bg-white/70 border border-stone-300/70 p-3.5 rounded-2xl shadow-sm">
+                <div class="w-11 h-11 rounded-full rank-circle-gold flex items-center justify-center font-black text-xl flex-shrink-0">
+                    ${w.rank}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="ml-font text-2xl font-bold text-stone-900 truncate leading-snug">
+                        ${escapeHTML(w.name)}
+                    </div>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-xs font-black uppercase tracking-wider text-amber-900 bg-amber-500/20 px-2 py-0.5 rounded">
+                            ${escapeHTML(w.team || 'Team')}
+                        </span>
+                        ${w.grade ? `<span class="text-xs font-mono font-bold text-emerald-800 bg-emerald-500/10 px-1.5 py-0.5 rounded">Grade: ${escapeHTML(w.grade)}</span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Trigger Overlay Entrance
+    overlay.classList.remove('hidden', 'poster-exit');
+    overlay.classList.add('poster-active');
+
+    // 30-Second Progress Line Animation
+    const fill = document.getElementById('posterTimeFill');
+    const timerLabel = document.getElementById('posterTimerSec');
+    
+    if (fill) {
+        fill.style.transition = 'none';
+        fill.style.width = '0%';
+        void fill.offsetWidth;
+        fill.style.transition = `width ${ANNOUNCEMENT_DURATION}ms linear`;
+        fill.style.width = '100%';
+    }
+
+    let remainingSec = ANNOUNCEMENT_DURATION / 1000;
+    const interval = setInterval(() => {
+        remainingSec--;
+        if (timerLabel) timerLabel.textContent = `${remainingSec}s`;
+        if (remainingSec <= 0) {
+            clearInterval(interval);
+        }
+    }, 1000);
+
+    // Switch to next in queue after 30 seconds
+    setTimeout(() => {
+        processNextAnnouncement();
+    }, ANNOUNCEMENT_DURATION);
+}
+
+// ─────────────────────────────────────────────
+// NORMAL SCREENS (ROTATION)
+// ─────────────────────────────────────────────
 function renderTeamChampionship() {
     const grid = document.getElementById('teamChampionshipGrid');
     if (!grid) return;
@@ -236,8 +344,7 @@ function buildSlidesSequence() {
 }
 
 function displayCurrentSlide() {
-    // If the overlay is active, don't interrupt it with a slide change
-    if (document.getElementById('newResultOverlay').classList.contains('announce-active')) return;
+    if (isAnnouncing) return;
 
     if (!slidesList.length) buildSlidesSequence();
     const slide = slidesList[currentSlideIndex];
@@ -289,43 +396,60 @@ function startAutoRotation() {
     }, ROTATION_DURATION);
 }
 
+// ─────────────────────────────────────────────
+// REALTIME DATA LISTENERS
+// ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Config Metadata
     onSnapshot(doc(db, "institutes", instId, "metadata", "eventConfig"), (snap) => {
         eventConfig = snap.exists() ? snap.data() : null;
         updateHeader();
     });
 
+    // 2. Aggregates for Leaderboard & Ticker
     onSnapshot(doc(db, "institutes", instId, "metadata", "dashboard"), (snap) => {
         if (snap.exists()) {
             const data = snap.data();
             dashboardData = data;
             leaderboardData = data.publicLeaderboard || [];
             categoryPerformanceData = data.publicCategoryPerformance || [];
-            
-            const newResultsList = data.publicLatestPublishedResults || [];
-            
-            // Check if there's a new result to announce
-            if (newResultsList.length > 0) {
-                const newestResult = newResultsList[0];
-                // If this is not the first load, and the ID is different, trigger takeover
-                if (lastAnnouncedResultId !== null && newestResult.id !== lastAnnouncedResultId) {
-                    triggerNewResultAnnouncement(newestResult);
-                }
-                lastAnnouncedResultId = newestResult.id;
-            }
-            
-            latestPublishedResults = newResultsList;
+            latestPublishedResults = data.publicLatestPublishedResults || [];
         }
 
         assignTeamColors();
         buildSlidesSequence();
         updateHeader();
         renderMarqueeRibbon();
-        
-        // Only force display if the announcement isn't running
-        if (!document.getElementById('newResultOverlay').classList.contains('announce-active')) {
+
+        if (!isAnnouncing) {
             displayCurrentSlide();
         }
+    });
+
+    // 3. Raw Published Results Listener (Extracts 1st, 2nd, 3rd Winner Rosters)
+    const resultsCol = collection(db, "institutes", instId, "results");
+    const qResults = query(resultsCol, where("status", "==", "published"), where("publicReleased", "==", true));
+
+    onSnapshot(qResults, (snapshot) => {
+        if (isFirstSync) {
+            // Seed existing published documents so only future publications trigger popups
+            snapshot.docs.forEach(docSnap => processedResultDocIds.add(docSnap.id));
+            isFirstSync = false;
+            return;
+        }
+
+        snapshot.docChanges().forEach((change) => {
+            if (change.type === "added" || change.type === "modified") {
+                const docId = change.doc.id;
+                const data = change.doc.data();
+
+                // Detect newly published event
+                if (!processedResultDocIds.has(docId)) {
+                    processedResultDocIds.add(docId);
+                    queueResultAnnouncement(data);
+                }
+            }
+        });
     });
 
     startAutoRotation();
