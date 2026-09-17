@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Download Result | Sweets of Madina '26</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Manjari:wght@400;700&family=Anek+Malayalam:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;700;900&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -19,15 +18,13 @@
 
         .vertical-results-watermark {
             writing-mode: vertical-rl; text-orientation: mixed;
-            font-size: 110px; font-weight: 900; letter-spacing: 0.1em;
+            font-size: 110px; font-weight: 900; letter-spacing: 0.25em;
             color: transparent; -webkit-text-stroke: 2px rgba(0, 0, 0, 0.04);
             line-height: 1;
         }
 
-        /* Fixed Mobile Scaling Wrapper */
         #posterWrapper { width: 90%; max-width: 450px; position: relative; overflow: hidden; margin: 2rem auto; border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); background-color: #fdfbf7; }
         #posterCanvas { width: 1080px; height: 1080px; position: absolute; top: 0; left: 0; transform-origin: top left; display: flex; flex-direction: column; background-color: #fdfbf7; }
-
         .ambient-glow { position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%); width: 80vw; height: 80vw; background: radial-gradient(circle, rgba(217, 119, 6, 0.15) 0%, transparent 60%); filter: blur(40px); z-index: -1; pointer-events: none; }
     </style>
 </head>
@@ -43,16 +40,11 @@
     <div id="posterWrapper">
         <div id="posterCanvas">
             
-            <!-- TOP SECTION (Watermark is now strictly trapped inside this light area) -->
+            <!-- TOP SECTION -->
             <div class="relative z-10 flex-1 flex flex-col px-12 pt-10 pb-4 text-stone-900 overflow-hidden">
                 
-                <!-- Watermark constrained to the light section -->
-                <div class="absolute right-6 top-1/2 -translate-y-1/2 z-0 pointer-events-none select-none">
-                    <div class="vertical-results-watermark">RESULTS</div>
-                </div>
-
                 <!-- Header (Enlarged QLB Campaign Logo) -->
-                <div class="relative z-10 flex justify-between items-center mb-8 border-b border-stone-200 pb-5">
+                <div class="relative z-20 flex justify-between items-center mb-8 border-b border-stone-200 pb-5">
                     <img src="./assets/icflgo.svg" alt="ICF" class="h-16 w-auto object-contain">
                     <span class="cinzel-font text-stone-800 text-[26px] font-black tracking-[0.25em] uppercase">
                         Sweets of Madina '26
@@ -60,18 +52,25 @@
                     <div class="w-20 h-20 bg-stone-800 svg-mask" style="-webkit-mask-image: url('./assets/qlb.svg'); mask-image: url('./assets/qlb.svg');"></div>
                 </div>
 
-                <!-- Program Details -->
-                <div class="relative z-10 flex items-center gap-6 mb-8">
-                    <div id="posterProgCode" class="mono-font text-[80px] font-black text-stone-300 leading-none">--</div>
-                    <div class="flex flex-col border-l-[4px] border-amber-500 pl-6 py-2">
-                        <span id="posterCategory" class="ml-font text-stone-500 font-bold uppercase tracking-widest text-lg mb-1">Category</span>
-                        <h2 id="posterProgName" class="ml-font text-5xl font-black text-stone-900 tracking-tight leading-none line-clamp-2">Loading...</h2>
+                <div class="relative flex-1 flex flex-col z-10 pb-4">
+                    <!-- Watermark strictly bounded below header line -->
+                    <div class="absolute right-2 top-0 bottom-0 z-0 pointer-events-none select-none flex items-center">
+                        <div class="vertical-results-watermark">RESULTS</div>
                     </div>
-                </div>
 
-                <!-- Dynamic Winners List -->
-                <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full pr-24">
-                    <div class="text-stone-400 font-bold text-2xl animate-pulse">Fetching official records...</div>
+                    <!-- Program Details -->
+                    <div class="relative z-10 flex items-center gap-6 mb-8">
+                        <div id="posterProgCode" class="mono-font text-[80px] font-black text-stone-300 leading-none">--</div>
+                        <div class="flex flex-col border-l-[4px] border-amber-500 pl-6 py-2">
+                            <span id="posterCategory" class="ml-font text-stone-500 font-bold uppercase tracking-widest text-lg mb-1">Category</span>
+                            <h2 id="posterProgName" class="ml-font text-5xl font-black text-stone-900 tracking-tight leading-none line-clamp-2">Loading...</h2>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Winners List -->
+                    <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full pr-12">
+                        <div class="text-stone-400 font-bold text-2xl animate-pulse">Fetching official records...</div>
+                    </div>
                 </div>
             </div>
 
@@ -100,66 +99,62 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="w-full max-w-md mx-auto flex flex-col gap-4 mt-2 mb-10">
+    <div class="w-full max-w-md mx-auto flex flex-col gap-3 mt-2 mb-10">
         <button id="btnDownload" class="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-lg tracking-wide shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all flex items-center justify-center gap-3">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             Download HD Poster
+        </button>
+        <button id="btnReturn" class="w-full py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-sm tracking-wide transition-all flex items-center justify-center gap-2">
+            Return to Live TV Display
         </button>
     </div>
 
     <script type="module">
         import { db, doc, getDoc, collection, query, where, getDocs } from './js/firebase.js';
 
-        // Fixes the mobile cutoff issue by explicitly computing the wrapper height
+        let targetInstId = '';
+
         function resizePoster() {
             const wrapper = document.getElementById('posterWrapper');
             const canvas = document.getElementById('posterCanvas');
             const width = wrapper.clientWidth;
             const scale = width / 1080;
             canvas.style.transform = `scale(${scale})`;
-            wrapper.style.height = `${1080 * scale}px`; // Force wrapper to accommodate scaled canvas
+            wrapper.style.height = `${1080 * scale}px`;
         }
         window.addEventListener('resize', resizePoster);
-        
-        // Ensure fonts load before first calculation
         document.fonts.ready.then(resizePoster);
         setTimeout(resizePoster, 100);
 
-        // Hashed Gradient generator using exact immutable ID
         function getGradientForString(str) {
             let hash = 0;
             for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
             const gradients = [
-                'linear-gradient(to bottom right, #450a0a, #dc2626)', // Cherry Red
-                'linear-gradient(to bottom right, #172554, #2563eb)', // Sapphire Blue
-                'linear-gradient(to bottom right, #052e16, #16a34a)', // Forest Green
-                'linear-gradient(to bottom right, #3b0764, #9333ea)', // Royal Purple
-                'linear-gradient(to bottom right, #431407, #ea580c)', // Terracotta Orange
-                'linear-gradient(to bottom right, #042f2e, #0d9488)', // Deep Teal
-                'linear-gradient(to bottom right, #4c0519, #e11d48)'  // Rose Pink
+                'linear-gradient(to bottom right, #450a0a, #dc2626)', 'linear-gradient(to bottom right, #172554, #2563eb)',
+                'linear-gradient(to bottom right, #052e16, #16a34a)', 'linear-gradient(to bottom right, #3b0764, #9333ea)',
+                'linear-gradient(to bottom right, #431407, #ea580c)', 'linear-gradient(to bottom right, #042f2e, #0d9488)',
+                'linear-gradient(to bottom right, #4c0519, #e11d48)'
             ];
             return gradients[Math.abs(hash) % gradients.length];
         }
 
         function escapeHTML(str) {
-            if (!str) return '';
-            const div = document.createElement('div'); div.textContent = str; return div.innerHTML;
+            if (!str) return ''; const div = document.createElement('div'); div.textContent = str; return div.innerHTML;
         }
 
         async function fetchAndRenderResult() {
             const params = new URLSearchParams(window.location.search);
-            const instId = params.get('id');
+            targetInstId = params.get('id');
             const progId = params.get('prog');
 
-            if (!instId || !progId) {
+            if (!targetInstId || !progId) {
                 document.getElementById('posterWinnersContainer').innerHTML = `<div class="text-red-500 font-bold text-2xl">Error: Missing ID in URL.</div>`;
                 return;
             }
 
             try {
-                const resultsCol = collection(db, "institutes", instId, "results");
+                const resultsCol = collection(db, "institutes", targetInstId, "results");
                 let resData = null;
-                
                 const q = query(resultsCol, where("programId", "==", progId));
                 const qSnap = await getDocs(q);
                 
@@ -175,7 +170,6 @@
                     return;
                 }
 
-                // Render Data (Using programId ensures consistent color forever)
                 const stableId = resData.programId || progId;
                 document.getElementById('posterGradientFooter').style.background = getGradientForString(stableId);
                 
@@ -194,25 +188,27 @@
 
                 const winnersContainer = document.getElementById('posterWinnersContainer');
                 if (winnersList.length === 0) {
-                    winnersContainer.innerHTML = `<div class="text-stone-500 font-bold text-2xl">No ranked winners recorded.</div>`;
+                    winnersContainer.innerHTML = `<div class="text-stone-500 font-bold text-2xl pl-16">No ranked winners recorded.</div>`;
                     return;
                 }
 
                 const firstPlace = winnersList.filter(w => w.rank === 1);
                 const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
 
-                let html = `<div class="flex flex-col gap-6 w-full">`;
+                // Indented the container for beautiful hierarchy
+                let html = `<div class="flex flex-col gap-7 w-full pl-[90px] mt-4">`;
 
                 firstPlace.forEach(w => {
                     html += `
                     <div class="flex items-center gap-7">
                         <div class="text-[85px] leading-none text-amber-500 font-black drop-shadow-sm flex-shrink-0">1</div>
                         <div class="min-w-0">
-                            <div class="ml-font text-[42px] font-black text-stone-900 leading-[1.1] mb-2 truncate max-w-2xl">
+                            <div class="ml-font text-[42px] font-black text-stone-900 leading-[1.1] mb-2 truncate max-w-[500px]">
                                 ${escapeHTML(w.studentName || w.name || 'Candidate')}
                             </div>
                             <div class="flex items-center gap-3">
                                 <span class="text-lg font-bold uppercase tracking-widest text-stone-500">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                                ${w.grade ? `<span class="bg-stone-200 text-stone-600 px-2 py-0.5 rounded text-sm font-mono font-bold">Grade: ${escapeHTML(w.grade)}</span>` : ''}
                             </div>
                         </div>
                     </div>`;
@@ -225,7 +221,7 @@
                         <div class="flex items-center gap-6">
                             <div class="text-[46px] leading-none text-stone-300 font-black w-12 text-center flex-shrink-0">${w.rank}</div>
                             <div class="min-w-0">
-                                <div class="ml-font text-3xl font-bold text-stone-700 leading-none mb-1.5 truncate max-w-xl">
+                                <div class="ml-font text-3xl font-bold text-stone-700 leading-none mb-1.5 truncate max-w-[450px]">
                                     ${escapeHTML(w.studentName || w.name || 'Candidate')}
                                 </div>
                                 <div class="flex items-center gap-2">
@@ -240,9 +236,8 @@
                 winnersContainer.innerHTML = html;
                 
                 setTimeout(resizePoster, 300);
-
             } catch (error) {
-                console.error("Firebase Error:", error);
+                console.error(error);
                 document.getElementById('posterWinnersContainer').innerHTML = `<div class="text-red-500 font-bold text-2xl">Error connecting to database.</div>`;
             }
         }
@@ -256,11 +251,7 @@
             const currentTransform = targetCanvas.style.transform;
             targetCanvas.style.transform = 'scale(1)';
 
-            html2canvas(targetCanvas, {
-                scale: 2, 
-                useCORS: true,
-                backgroundColor: '#fdfbf7'
-            }).then(canvas => {
+            html2canvas(targetCanvas, { scale: 2, useCORS: true, backgroundColor: '#fdfbf7' }).then(canvas => {
                 targetCanvas.style.transform = currentTransform; 
                 const link = document.createElement('a');
                 link.download = `Result_Poster_${Date.now()}.jpeg`;
@@ -268,11 +259,19 @@
                 link.click();
                 btn.innerHTML = originalText;
             }).catch(err => {
-                console.error('Render failed', err);
                 targetCanvas.style.transform = currentTransform;
                 btn.innerHTML = `Error Generating Poster`;
                 setTimeout(() => btn.innerHTML = originalText, 3000);
             });
+        });
+
+        // Redirect back to Live Display
+        document.getElementById('btnReturn').addEventListener('click', () => {
+            if(targetInstId) {
+                window.location.href = `./pages/live-display.html?id=${targetInstId}`;
+            } else {
+                window.location.href = './index.html';
+            }
         });
 
         fetchAndRenderResult();
