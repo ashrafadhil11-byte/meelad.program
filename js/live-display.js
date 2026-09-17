@@ -142,23 +142,35 @@ function processNextAnnouncement() {
 function renderPosterCard(res) {
     const overlay = document.getElementById('posterAnnouncementOverlay');
     
-    // 1. Inject Gradient to Footer (95% Top Left -> 60% Bottom Right)
+    // Inject Gradient to Footer
     const stableId = res.programId || res.id || 'default';
     const uniqueGradient = getGradientForString(stableId);
     document.getElementById('posterGradientFooter').style.background = uniqueGradient;
 
-    // 2. Populate Text
+    // ✅ FIXED: Strip redundant program code from the program name to prevent "03 03 Calligraphy"
+    let pCode = res.programCode ? String(res.programCode).padStart(2, '0') : '01';
+    let pName = res.programName || 'Competition Program';
+    
+    let rawCode = String(res.programCode || '').trim();
+    let paddedCode = rawCode.padStart(2, '0');
+    if (rawCode && pName.toLowerCase().startsWith(rawCode.toLowerCase())) {
+        pName = pName.substring(rawCode.length).trim();
+    } else if (paddedCode && pName.toLowerCase().startsWith(paddedCode.toLowerCase())) {
+        pName = pName.substring(paddedCode.length).trim();
+    }
+    if (pName.startsWith('-') || pName.startsWith(':')) pName = pName.substring(1).trim();
+
     document.getElementById('posterCategory').textContent = res.categoryName || 'General';
-    document.getElementById('posterProgCode').textContent = res.programCode ? String(res.programCode).padStart(2, '0') : '01';
-    document.getElementById('posterProgName').textContent = res.programName || 'Competition Program';
+    document.getElementById('posterProgCode').textContent = pCode;
+    document.getElementById('posterProgName').textContent = pName;
     document.getElementById('posterQueueCounter').textContent = `Queue: ${announcementQueue.length + 1}`;
 
-    // 3. Generate QR Code via API to Dedicated Result Webpage
+    // Generate QR Code
     const programUrl = `${PUBLIC_DOMAIN_URL}?id=${instId}&prog=${stableId}`;
     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&format=svg&color=000000&bgcolor=ffffff&data=${encodeURIComponent(programUrl)}`;
     document.getElementById('posterQrImage').src = qrApiUrl;
 
-    // 4. Extract Winners (1st, 2nd, 3rd)
+    // Extract Winners
     let winnersList = [];
     if (Array.isArray(res.marksData) && res.marksData.length > 0) {
         winnersList = [...res.marksData].filter(m => m.rank && m.rank <= 3).sort((a, b) => a.rank - b.rank);
@@ -168,15 +180,13 @@ function renderPosterCard(res) {
 
     const winnersContainer = document.getElementById('posterWinnersContainer');
     if (winnersList.length === 0) {
-        winnersContainer.innerHTML = `<div class="text-stone-500 font-bold py-6 text-xl pl-[75px]">Results finalized. Awaiting roster data.</div>`;
+        winnersContainer.innerHTML = `<div class="text-stone-500 font-bold py-6 text-xl pl-[70px]">Results finalized. Awaiting roster data.</div>`;
     } else {
         const firstPlace = winnersList.filter(w => w.rank === 1);
         const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
 
-        // Center Alignment Shift: Added padding left (pl-[75px]) and centered margins
         let html = `<div class="flex flex-col gap-5 w-full pl-[75px] mt-2">`;
 
-        // First Place Display (Massive text)
         firstPlace.forEach(w => {
             html += `
             <div class="flex items-center gap-6">
@@ -193,7 +203,6 @@ function renderPosterCard(res) {
             </div>`;
         });
 
-        // 2nd & 3rd Place Display (Smaller)
         if (runnersUp.length > 0) {
             html += `<div class="flex flex-col gap-4 mt-3 pl-3">`;
             runnersUp.forEach(w => {
@@ -216,11 +225,9 @@ function renderPosterCard(res) {
         winnersContainer.innerHTML = html;
     }
 
-    // Trigger Entrance
     overlay.classList.remove('hidden', 'poster-overlay-exit');
     overlay.classList.add('poster-overlay-active');
 
-    // 30s Timer Animation
     const fill = document.getElementById('posterTimeFill');
     if (fill) {
         fill.style.transition = 'none'; fill.style.width = '0%';
@@ -229,7 +236,6 @@ function renderPosterCard(res) {
         fill.style.width = '100%';
     }
 
-    // Advance Queue
     setTimeout(() => { processNextAnnouncement(); }, ANNOUNCEMENT_DURATION);
 }
 
