@@ -38,7 +38,7 @@
         .vertical-results-watermark {
             writing-mode: vertical-rl;
             text-orientation: mixed;
-            font-size: clamp(3.5rem, 8vh, 6rem);
+            font-size: 10vh;
             font-weight: 900;
             letter-spacing: 0.35em;
             color: transparent;
@@ -57,8 +57,6 @@
         
         <!-- TOP ZONE: TV-Safe Header Bar -->
         <header class="px-6 md:px-10 pt-6 pb-2 flex items-center justify-between w-full transition-opacity duration-500 gap-4" id="normalTopHeader">
-            
-            <!-- Left Header: Locked width to prevent title wrap -->
             <div class="flex items-center gap-4 flex-shrink-0 min-w-0">
                 <img src="../assets/icflgo.svg" alt="Main Logo" class="h-12 md:h-14 w-auto object-contain drop-shadow-md flex-shrink-0">
                 <div class="flex flex-col justify-center mt-1 overflow-hidden">
@@ -68,12 +66,10 @@
                         </span>
                         <span id="statLastUpdated" class="text-[10px] md:text-xs text-stone-500 font-semibold tracking-wide whitespace-nowrap">Syncing...</span>
                     </div>
-                    <!-- Title forced to never wrap -->
                     <h1 id="liveMeeladName" class="cinzel-font text-xl md:text-2xl lg:text-3xl font-black tracking-tight text-stone-900 leading-none whitespace-nowrap truncate">MEELAD CHAMPIONSHIP</h1>
                 </div>
             </div>
 
-            <!-- Right Header: Metrics -->
             <div class="flex items-center gap-4 md:gap-6 flex-shrink-0">
                 <div class="glass-panel rounded-xl md:rounded-2xl px-4 md:px-5 py-1.5 md:py-2 flex items-center gap-4 md:gap-6 border">
                     <div class="text-left">
@@ -97,7 +93,6 @@
 
         <!-- MIDDLE ZONE: TV-Safe Main Viewport -->
         <main class="flex-1 w-full md:w-[60%] lg:w-[55%] px-6 md:px-10 py-1 flex flex-col justify-center relative">
-            
             <div class="flex items-center justify-between mb-4 md:mb-6 transition-opacity duration-500 gap-4" id="normalViewHeader">
                 <div class="flex items-center gap-3 min-w-0">
                     <span id="viewTitle" class="cinzel-font text-xl md:text-2xl font-black uppercase text-stone-800 tracking-wider whitespace-nowrap truncate">Overall Standings</span>
@@ -143,43 +138,43 @@
         </footer>
 
         <!-- ─────────────────────────────────────────────
-             THE POSTER OVERLAY (1:1 RATIO, LIGHT TOP + GRADIENT BOTTOM)
+             THE POSTER OVERLAY (1:1 RATIO, PERFECT ALIGNMENT)
              ───────────────────────────────────────────── -->
         <div id="posterAnnouncementOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/60 p-4 md:p-6">
             
-            <div id="posterDynamicCard" class="poster-card-entrance relative w-[90vh] h-[90vh] md:w-[88vh] md:h-[88vh] aspect-square rounded-2xl md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col bg-gradient-to-br from-[#ffffff] via-[#fbf8f4] to-[#f0ece4]">
+            <div id="posterDynamicCard" class="poster-card-entrance relative h-[88vh] aspect-square rounded-[2rem] shadow-2xl overflow-hidden flex flex-col bg-gradient-to-br from-[#ffffff] via-[#fbf8f4] to-[#f0ece4] mx-auto">
                 
                 <!-- TOP SECTION: Light Beige Workspace -->
-                <div class="relative z-10 flex-1 flex flex-col px-6 md:px-10 pt-6 md:pt-8 overflow-hidden">
+                <div class="relative z-10 flex-1 flex flex-col px-12 pt-10 overflow-hidden">
                     
                     <!-- Header -->
-                    <div class="relative z-20 flex justify-between items-center mb-4 md:mb-6 border-b border-stone-200 pb-3 md:pb-4">
-                        <img src="../assets/icflgo.svg" alt="ICF" class="h-10 md:h-12 w-auto object-contain flex-shrink-0">
-                        <span class="cinzel-font text-stone-800 text-base md:text-xl font-black tracking-[0.2em] md:tracking-[0.25em] uppercase whitespace-nowrap px-2 text-center">
+                    <div class="relative z-20 flex justify-between items-center mb-8 border-b border-stone-200 pb-5">
+                        <img src="../assets/icflgo.svg" alt="ICF" class="h-14 w-auto object-contain flex-shrink-0">
+                        <span class="cinzel-font text-stone-800 text-2xl font-black tracking-[0.25em] uppercase whitespace-nowrap px-4 text-center">
                             Sweets of Madina '26
                         </span>
-                        <div class="w-10 h-10 md:w-12 md:h-12 bg-stone-800 svg-mask flex-shrink-0" style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');"></div>
+                        <div class="w-14 h-14 bg-stone-800 svg-mask flex-shrink-0" style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');"></div>
                     </div>
 
                     <!-- Inner Body -->
                     <div class="relative flex-1 flex flex-col z-10 pb-4">
                         
                         <!-- Watermark -->
-                        <div class="absolute right-0 top-[110px] bottom-0 flex items-center justify-center pointer-events-none select-none z-0">
-                            <div class="vertical-results-watermark pr-2">RESULTS</div>
+                        <div class="absolute right-[2%] top-[10%] bottom-[5%] flex items-center justify-center pointer-events-none select-none z-0">
+                            <div class="vertical-results-watermark">RESULTS</div>
                         </div>
 
                         <!-- Program Details -->
-                        <div class="relative z-10 flex items-center gap-4 md:gap-5 mb-4 md:mb-6">
-                            <div id="posterProgCode" class="mono-font text-5xl md:text-6xl font-black text-stone-300">01</div>
-                            <div class="flex flex-col border-l-[3px] border-amber-500 pl-4 md:pl-5">
-                                <span id="posterCategory" class="ml-font text-stone-500 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mb-1">സീനിയർ</span>
-                                <h2 id="posterProgName" class="ml-font text-3xl md:text-4xl font-black text-stone-900 tracking-tight leading-none line-clamp-2">ഖിറാഅത്ത്</h2>
+                        <div class="relative z-10 flex items-center mb-8">
+                            <div id="posterProgCode" class="mono-font text-[75px] leading-none font-black text-stone-300 w-28 text-right pr-6 border-r-[4px] border-amber-500">01</div>
+                            <div class="flex flex-col pl-6 justify-center">
+                                <span id="posterCategory" class="ml-font text-stone-500 font-bold uppercase tracking-widest text-xs mb-1">സീനിയർ</span>
+                                <h2 id="posterProgName" class="ml-font text-4xl font-black text-stone-900 tracking-tight leading-none line-clamp-2">ഖിറാഅത്ത്</h2>
                             </div>
                         </div>
 
                         <!-- Dynamic Winners List -->
-                        <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full pr-12 md:pr-16">
+                        <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full pr-16">
                             <!-- JS Injected -->
                         </div>
 
@@ -187,27 +182,27 @@
                 </div>
 
                 <!-- BOTTOM SECTION: Dynamic Gradient Footer -->
-                <div id="posterGradientFooter" class="h-[25%] w-full relative px-6 md:px-10 py-4 md:py-5 flex items-center justify-between text-white shadow-[inset_0_10px_20px_rgba(0,0,0,0.05)] z-20">
+                <div id="posterGradientFooter" class="h-[22%] w-full relative px-12 py-5 flex items-center justify-between text-white shadow-[inset_0_10px_20px_rgba(0,0,0,0.05)] z-20">
                     
                     <div class="flex-1 max-w-[60%]">
                         <div class="flex items-center gap-3 mb-2">
-                            <span class="px-2 py-1 rounded-full bg-white/20 text-white font-bold text-[8px] md:text-[9px] tracking-widest uppercase backdrop-blur-sm border border-white/30 shadow-sm whitespace-nowrap">
-                                <span class="inline-block w-1 h-1 md:w-1.5 md:h-1.5 bg-white rounded-full animate-pulse mr-1"></span> LIVE RESULT
+                            <span class="px-2.5 py-1 rounded-full bg-white/20 text-white font-bold text-[9px] tracking-widest uppercase backdrop-blur-sm border border-white/30 shadow-sm whitespace-nowrap">
+                                <span class="inline-block w-1.5 h-1.5 bg-white rounded-full animate-pulse mr-1"></span> LIVE RESULT
                             </span>
-                            <span id="posterQueueCounter" class="text-[9px] md:text-[10px] font-mono text-white/90 uppercase font-bold tracking-wider whitespace-nowrap">Queue: 1/1</span>
+                            <span id="posterQueueCounter" class="text-[10px] font-mono text-white/90 uppercase font-bold tracking-wider whitespace-nowrap">Queue: 1/1</span>
                         </div>
                         <div class="w-full h-1 bg-black/20 rounded-full overflow-hidden shadow-inner">
                             <div id="posterTimeFill" class="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-3 md:gap-4 flex-shrink-0">
-                        <div class="text-right flex flex-col justify-center hidden sm:flex">
-                            <span class="text-white font-black text-sm md:text-base uppercase tracking-wider drop-shadow-md">Download</span>
-                            <span class="text-white/80 text-[8px] md:text-[9px] font-bold tracking-widest uppercase drop-shadow-sm">Scan High-Res Poster</span>
+                    <div class="flex items-center gap-4 flex-shrink-0">
+                        <div class="text-right flex flex-col justify-center">
+                            <span class="text-white font-black text-base uppercase tracking-wider drop-shadow-md">Download</span>
+                            <span class="text-white/80 text-[9px] font-bold tracking-widest uppercase drop-shadow-sm">Scan High-Res Poster</span>
                         </div>
                         <div class="bg-white p-1.5 rounded-xl shadow-xl flex-shrink-0">
-                            <img id="posterQrImage" src="" alt="QR" class="w-12 h-12 md:w-16 md:h-16 object-contain rounded-lg mix-blend-multiply">
+                            <img id="posterQrImage" src="" alt="QR" class="w-16 h-16 object-contain rounded-lg mix-blend-multiply">
                         </div>
                     </div>
                 </div>
