@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Control | Grand Finale</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f1115; color: #ffffff; }</style>
+</head>
+<body class="p-6 flex flex-col items-center justify-center min-h-screen">
+    
+    <div class="w-full max-w-md bg-stone-900 border border-stone-800 rounded-3xl p-8 shadow-2xl text-center">
+        <div class="mb-8">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-black tracking-widest uppercase border border-emerald-500/20">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Controller Active
+            </span>
+            <h1 class="text-3xl font-black mt-4">Grand Finale</h1>
+            <p class="text-stone-400 text-sm mt-1">Remote Control for TV Display</p>
+        </div>
+
+        <div id="standingsPreview" class="bg-black/50 rounded-2xl p-4 mb-8 border border-white/5 hidden">
+            <p class="text-xs font-bold text-stone-500 uppercase tracking-widest mb-3">Locked Standings Preview</p>
+            <div class="space-y-2 text-left">
+                <div class="flex justify-between items-center text-amber-500 font-bold bg-amber-500/10 px-3 py-2 rounded-lg">
+                    <span>1. <span id="prev1" class="text-white"></span></span> <span id="prev1pts"></span>
+                </div>
+                <div class="flex justify-between items-center text-slate-300 font-bold bg-slate-500/10 px-3 py-2 rounded-lg">
+                    <span>2. <span id="prev2" class="text-white"></span></span> <span id="prev2pts"></span>
+                </div>
+                <div class="flex justify-between items-center text-amber-700 font-bold bg-amber-700/10 px-3 py-2 rounded-lg">
+                    <span>3. <span id="prev3" class="text-white"></span></span> <span id="prev3pts"></span>
+                </div>
+            </div>
+        </div>
+
+        <button id="btnCommence" class="w-full py-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:scale-[1.02] text-white font-black text-xl tracking-widest uppercase shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all mb-4 opacity-50 cursor-not-allowed">
+            Waiting for Data...
+        </button>
+
+        <button id="btnReset" class="w-full py-3 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold tracking-wide transition-all border border-stone-700">
+            Reset TV Display (Hidden)
+        </button>
+    </div>
+
+    <script type="module">
+        import { db, doc, onSnapshot, setDoc } from '../js/firebase.js';
+
+        const instId = new URLSearchParams(window.location.search).get('id') || "XnTaWEgDWBqdODmxXGG4";
+        let isDataReady = false;
+
+        // Fetch Standings
+        onSnapshot(doc(db, "institutes", instId, "metadata", "dashboard"), (snap) => {
+            if (snap.exists()) {
+                const lb = snap.data().publicLeaderboard || [];
+                if (lb.length >= 3) {
+                    isDataReady = true;
+                    document.getElementById('standingsPreview').classList.remove('hidden');
+                    document.getElementById('prev1').textContent = lb[0].name; document.getElementById('prev1pts').textContent = lb[0].points;
+                    document.getElementById('prev2').textContent = lb[1].name; document.getElementById('prev2pts').textContent = lb[1].points;
+                    document.getElementById('prev3').textContent = lb[2].name; document.getElementById('prev3pts').textContent = lb[2].points;
+                    
+                    const btn = document.getElementById('btnCommence');
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btn.textContent = "🔥 Trigger Reveal on TV";
+                }
+            }
+        });
+
+        // Trigger TV Animation
+        document.getElementById('btnCommence').addEventListener('click', async () => {
+            if (!isDataReady) return alert("Standings are not locked yet.");
+            
+            const btn = document.getElementById('btnCommence');
+            btn.textContent = "Transmitting...";
+            
+            await setDoc(doc(db, "institutes", instId, "metadata", "finaleControl"), {
+                trigger: true,
+                timestamp: Date.now()
+            });
+
+            btn.textContent = "✅ Animation Playing on TV";
+            btn.classList.replace('from-emerald-500', 'from-stone-600');
+            btn.classList.replace('to-emerald-600', 'to-stone-700');
+            setTimeout(() => { btn.textContent = "🔥 Trigger Reveal on TV"; btn.classList.replace('from-stone-600', 'from-emerald-500'); btn.classList.replace('to-stone-700', 'to-emerald-600'); }, 5000);
+        });
+
+        // Reset TV back to Waiting State
+        document.getElementById('btnReset').addEventListener('click', async () => {
+            await setDoc(doc(db, "institutes", instId, "metadata", "finaleControl"), {
+                trigger: false,
+                timestamp: Date.now()
+            });
+            alert("TV Reset to waiting state.");
+        });
+    </script>
+</body>
+</html>
