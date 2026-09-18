@@ -30,63 +30,59 @@
         <p class="text-slate-400 text-sm">Review standings and download your poster below.</p>
     </div>
 
-    <!-- The 1080p Poster -->
     <div id="posterWrapper">
         <div id="posterCanvas">
             
-            <!-- TOP SECTION -->
-            <div class="relative z-10 flex-1 flex flex-col px-12 pt-10 pb-4 text-stone-900 overflow-hidden">
-                <div class="relative z-20 flex justify-between items-center mb-8 border-b border-stone-200 pb-5">
-                    <img src="./assets/icflgo.svg" alt="ICF" class="h-16 w-auto object-contain">
-                    <span class="cinzel-font text-stone-800 text-[26px] font-black tracking-[0.25em] uppercase">Sweets of Madina '26</span>
-                    <div class="w-20 h-20 bg-stone-800 svg-mask" style="-webkit-mask-image: url('./assets/qlb.svg'); mask-image: url('./assets/qlb.svg');"></div>
+            <div class="relative z-10 flex-1 flex flex-col px-12 pt-10 pb-4 text-stone-900 overflow-hidden min-h-0">
+                <div class="relative z-20 flex justify-between items-center mb-8 border-b border-stone-200 pb-5 flex-shrink-0 min-w-0">
+                    <img src="./assets/icflgo.svg" alt="ICF" class="h-16 w-auto object-contain flex-shrink-0">
+                    <span class="cinzel-font text-stone-800 text-[26px] font-black tracking-[0.25em] uppercase whitespace-nowrap px-2 text-center min-w-0 truncate">Sweets of Madina '26</span>
+                    <div class="w-20 h-20 bg-stone-800 svg-mask flex-shrink-0" style="-webkit-mask-image: url('./assets/qlb.svg'); mask-image: url('./assets/qlb.svg');"></div>
                 </div>
 
-                <div class="relative flex-1 flex flex-col z-10 pb-4">
+                <div class="relative flex-1 flex flex-col z-10 pb-4 min-h-0">
                     <div class="absolute right-2 top-[120px] bottom-4 z-0 pointer-events-none select-none flex items-center">
                         <div class="vertical-results-watermark">RESULTS</div>
                     </div>
 
-                    <!-- Program Details -->
-                    <div class="relative z-10 flex items-center gap-6 mb-8">
-                        <div id="posterProgCode" class="mono-font text-[80px] font-black text-stone-300 leading-none">--</div>
-                        <div class="flex flex-col border-l-[4px] border-amber-500 pl-6 py-2">
-                            <span id="posterCategory" class="ml-font text-stone-500 font-bold uppercase tracking-widest text-lg mb-1">Category</span>
-                            <h2 id="posterProgName" class="ml-font text-5xl font-black text-stone-900 tracking-tight leading-none line-clamp-2">Loading...</h2>
+                    <div class="relative z-10 flex items-center gap-6 mb-8 flex-shrink-0 min-w-0">
+                        <div id="posterProgCode" class="mono-font text-[80px] font-black text-stone-300 leading-none flex-shrink-0">--</div>
+                        <div class="flex flex-col border-l-[4px] border-amber-500 pl-6 py-2 min-w-0">
+                            <span id="posterCategory" class="ml-font text-stone-500 font-bold uppercase tracking-widest text-lg mb-1 truncate min-w-0">Category</span>
+                            <h2 id="posterProgName" class="ml-font text-5xl font-black text-stone-900 tracking-tight leading-none line-clamp-2 min-w-0">Loading...</h2>
                         </div>
                     </div>
 
-                    <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full">
+                    <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full min-h-0 overflow-hidden">
                         <div class="text-stone-400 font-bold text-2xl text-center animate-pulse">Fetching official records...</div>
                     </div>
                 </div>
             </div>
 
-            <!-- BOTTOM SECTION: Dynamic Gradient Footer -->
-            <div id="posterGradientFooter" class="h-[26%] w-full relative px-12 flex items-center justify-between text-white shadow-[inset_0_10px_20px_rgba(0,0,0,0.05)] bg-slate-900 z-20">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="px-4 py-1.5 rounded-full bg-white/20 text-white font-bold text-xs tracking-widest uppercase backdrop-blur-sm border border-white/30 shadow-sm">
+            <div id="posterGradientFooter" class="h-[20%] w-full relative px-12 flex items-center justify-between text-white shadow-[inset_0_10px_20px_rgba(0,0,0,0.05)] bg-slate-900 z-20 flex-shrink-0 min-w-0">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3 mb-2 min-w-0">
+                        <span class="px-4 py-1.5 rounded-full bg-white/20 text-white font-bold text-xs tracking-widest uppercase backdrop-blur-sm border border-white/30 shadow-sm whitespace-nowrap flex-shrink-0">
                             <span class="inline-block w-2.5 h-2.5 bg-white rounded-full mr-2"></span> VERIFIED
                         </span>
                     </div>
-                    <p class="text-white/80 font-medium text-lg mt-2">Official Championship Result</p>
+                    <p class="text-white/80 font-medium text-lg mt-2 truncate min-w-0">Official Championship Result</p>
                 </div>
 
-                <div class="flex items-center gap-5">
-                    <div class="text-right flex flex-col justify-center">
-                        <span class="text-white font-black text-2xl uppercase tracking-wider drop-shadow-md">Meelad '26</span>
-                        <span class="text-white/80 text-sm font-bold tracking-widest uppercase drop-shadow-sm">Scan to Verify</span>
+                <div class="flex items-center gap-5 flex-shrink-0">
+                    <div class="text-right flex flex-col justify-center min-w-0">
+                        <span class="text-white font-black text-2xl uppercase tracking-wider drop-shadow-md whitespace-nowrap">Meelad '26</span>
+                        <span class="text-white/80 text-sm font-bold tracking-widest uppercase drop-shadow-sm whitespace-nowrap">Scan to Verify</span>
                     </div>
-                    <div class="bg-white p-2.5 rounded-[1.25rem] shadow-xl">
-                        <img id="posterQrImage" src="" alt="QR" class="w-24 h-24 object-contain rounded-lg mix-blend-multiply">
+                    <div class="bg-white p-2.5 rounded-[1.25rem] shadow-xl flex-shrink-0">
+                        <img id="posterQrImage" src="" alt="QR" class="w-24 h-24 object-contain rounded-lg mix-blend-multiply flex-shrink-0">
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Action Button Only -->
+    <!-- Action Buttons -->
     <div class="w-full max-w-md mx-auto flex flex-col gap-3 mt-2 mb-10">
         <button id="btnDownload" class="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-lg tracking-wide shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all flex items-center justify-center gap-3">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -197,37 +193,37 @@
                 const firstPlace = winnersList.filter(w => w.rank === 1);
                 const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
 
-                // Beautiful Centered Margin Shift
-                let html = `<div class="flex flex-col gap-7 w-[85%] mx-auto mt-4 pl-8">`;
+                // Auto-Centering logic injected
+                let html = `<div class="flex flex-col justify-center gap-7 w-[90%] max-w-[800px] mx-auto mt-2 min-h-0">`;
 
                 firstPlace.forEach(w => {
                     html += `
                     <div class="flex items-center gap-7">
                         <div class="text-[85px] leading-none text-amber-500 font-black drop-shadow-sm flex-shrink-0">1</div>
-                        <div class="min-w-0">
-                            <div class="ml-font text-[42px] font-black text-stone-900 leading-[1.1] mb-2 truncate max-w-[550px]">
+                        <div class="flex-1 min-w-0">
+                            <div class="ml-font text-[42px] font-black text-stone-900 leading-[1.1] mb-2 truncate max-w-[500px]">
                                 ${escapeHTML(w.studentName || w.name || 'Candidate')}
                             </div>
                             <div class="flex items-center gap-3">
-                                <span class="text-lg font-bold uppercase tracking-widest text-stone-500">${escapeHTML(w.teamName || w.team || 'Team')}</span>
-                                ${w.grade ? `<span class="bg-stone-200 text-stone-600 px-2 py-0.5 rounded text-sm font-mono font-bold">Grade: ${escapeHTML(w.grade)}</span>` : ''}
+                                <span class="text-lg font-bold uppercase tracking-widest text-stone-500 whitespace-nowrap">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                                ${w.grade ? `<span class="bg-stone-200 text-stone-600 px-2 py-0.5 rounded text-sm font-mono font-bold whitespace-nowrap">Grade: ${escapeHTML(w.grade)}</span>` : ''}
                             </div>
                         </div>
                     </div>`;
                 });
 
                 if (runnersUp.length > 0) {
-                    html += `<div class="flex flex-col gap-5 mt-4 pl-3">`;
+                    html += `<div class="flex flex-col gap-5 mt-4 pl-3 min-h-0">`;
                     runnersUp.forEach(w => {
                         html += `
                         <div class="flex items-center gap-6">
                             <div class="text-[46px] leading-none text-stone-300 font-black w-12 text-center flex-shrink-0">${w.rank}</div>
-                            <div class="min-w-0">
+                            <div class="flex-1 min-w-0">
                                 <div class="ml-font text-3xl font-bold text-stone-700 leading-none mb-1.5 truncate max-w-[450px]">
                                     ${escapeHTML(w.studentName || w.name || 'Candidate')}
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-sm font-bold uppercase tracking-widest text-stone-400">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                                    <span class="text-sm font-bold uppercase tracking-widest text-stone-400 whitespace-nowrap">${escapeHTML(w.teamName || w.team || 'Team')}</span>
                                 </div>
                             </div>
                         </div>`;
