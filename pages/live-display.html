@@ -38,9 +38,9 @@
         .vertical-results-watermark {
             writing-mode: vertical-rl;
             text-orientation: mixed;
-            font-size: clamp(2.5rem, 6vh, 4.5rem);
+            font-size: clamp(3.5rem, 8vh, 6rem);
             font-weight: 900;
-            letter-spacing: 0.3em;
+            letter-spacing: 0.35em;
             color: transparent;
             -webkit-text-stroke: 1.5px rgba(0, 0, 0, 0.04);
             line-height: 1;
@@ -97,9 +97,9 @@
             <div id="screenCategoryComparison" class="screen-view flex-col w-full"><div id="categoryComparisonContainer" class="space-y-2 md:space-y-3 w-full"></div></div>
         </main>
 
-        <!-- BOTTOM ZONE (Sponsors Removed, Only Marquee Ticker) -->
+        <!-- BOTTOM ZONE -->
         <footer class="w-full flex flex-col transition-opacity duration-500" id="normalFooter">
-            <div class="h-10 md:h-11 bg-stone-900 text-stone-100 flex items-center overflow-hidden shadow-lg border-t border-amber-600/30">
+            <div class="h-10 md:h-11 bg-stone-900 text-stone-100 flex items-center overflow-hidden shadow-lg border-t border-amber-600/30 mt-auto">
                 <div class="h-full px-4 md:px-5 bg-amber-600 text-stone-950 font-black text-[10px] md:text-xs uppercase tracking-widest flex items-center gap-2 flex-shrink-0 z-10 shadow-md whitespace-nowrap">
                     <span>🔥</span> RESULTS
                 </div>
@@ -112,50 +112,76 @@
         </footer>
 
         <!-- ─────────────────────────────────────────────
-             THE POSTER OVERLAY (Strictly 85vh Box for TV)
+             SPONSOR ADVERTISEMENT POPUP OVERLAY
+             ───────────────────────────────────────────── -->
+        <div id="adSponsorOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-stone-900/90 p-4 md:p-6 backdrop-blur-md transition-opacity duration-500 opacity-0">
+            <div class="relative w-full h-full max-h-[85vh] max-w-5xl mx-auto rounded-[2rem] border border-white/10 bg-gradient-to-br from-stone-800 to-stone-950 shadow-2xl flex flex-col items-center justify-center p-10 overflow-hidden">
+                
+                <h2 class="cinzel-font text-amber-500 text-2xl md:text-4xl font-black tracking-[0.2em] uppercase mb-12 drop-shadow-md">
+                    Our Proud Sponsors
+                </h2>
+                
+                <div class="flex flex-col items-center justify-center gap-14 w-full flex-1">
+                    
+                    <!-- Main Sponsors Block -->
+                    <div class="flex flex-col items-center w-full">
+                        <span class="text-stone-400 font-bold tracking-widest uppercase text-[10px] md:text-xs mb-6">Main Sponsors</span>
+                        <div class="flex items-center justify-center gap-8 md:gap-16 bg-white/5 px-10 py-8 rounded-3xl border border-white/10 w-full max-w-3xl shadow-inner">
+                            <!-- Using white background pill for PNGs if they aren't transparent/visible on dark -->
+                            <div class="bg-white p-4 rounded-xl shadow-lg flex items-center justify-center h-24 md:h-32 w-full max-w-[300px]">
+                                <img src="../assets/lifelinecli.png" alt="Lifeline Clinic" class="max-h-full max-w-full object-contain">
+                            </div>
+                            <div class="h-16 md:h-20 w-px bg-white/20"></div>
+                            <div class="bg-white p-4 rounded-xl shadow-lg flex items-center justify-center h-24 md:h-32 w-full max-w-[300px]">
+                                <img src="../assets/lifelinehos.png" alt="Lifeline Hospital" class="max-h-full max-w-full object-contain">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Other Sponsors Block -->
+                    <div class="flex flex-col items-center w-full">
+                        <span class="text-stone-400 font-bold tracking-widest uppercase text-[10px] md:text-xs mb-4">Supported By</span>
+                        <div class="bg-white p-2 rounded-2xl shadow-xl">
+                            <img src="../assets/all.jpg" alt="All Sponsors" class="h-32 md:h-48 w-auto object-contain rounded-xl border border-stone-200">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ad Progress Bar -->
+                <div class="absolute bottom-0 left-0 w-full h-2 bg-white/10">
+                    <div id="adTimeFill" class="h-full bg-amber-500 w-0 shadow-[0_0_10px_rgba(245,158,11,0.8)]"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─────────────────────────────────────────────
+             THE POSTER OVERLAY (Result Card Z-50)
              ───────────────────────────────────────────── -->
         <div id="posterAnnouncementOverlay" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/60 p-4 md:p-6 overflow-hidden">
-            
             <div id="posterDynamicCard" class="poster-card-entrance relative w-full max-w-[85vh] aspect-square rounded-2xl md:rounded-[2rem] shadow-2xl overflow-hidden flex flex-col bg-gradient-to-br from-[#ffffff] via-[#fbf8f4] to-[#f0ece4] mx-auto">
-                
-                <!-- TOP SECTION: Light Beige Workspace -->
                 <div class="relative z-10 flex-1 flex flex-col px-6 md:px-10 pt-6 md:pt-8 overflow-hidden min-h-0">
-                    
-                    <!-- Header -->
                     <div class="relative z-20 flex justify-between items-center mb-4 md:mb-6 border-b border-stone-200 pb-3 md:pb-4 flex-shrink-0">
-                        <img src="../assets/icflgo.svg" alt="ICF" class="h-7 md:h-10 w-auto object-contain flex-shrink-0">
-                        <span class="cinzel-font text-stone-800 text-[10px] md:text-sm font-black tracking-[0.1em] md:tracking-[0.15em] uppercase whitespace-nowrap px-2 text-center">
+                        <img src="../assets/icflgo.svg" alt="ICF" class="h-10 md:h-12 w-auto object-contain flex-shrink-0">
+                        <span class="cinzel-font text-stone-800 text-base md:text-xl font-black tracking-[0.2em] md:tracking-[0.25em] uppercase whitespace-nowrap px-2 text-center">
                             Sweets of Madina '26
                         </span>
-                        <div class="w-7 h-7 md:w-10 md:h-10 bg-stone-800 svg-mask flex-shrink-0" style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');"></div>
+                        <div class="w-10 h-10 md:w-12 md:h-12 bg-stone-800 svg-mask flex-shrink-0" style="-webkit-mask-image: url('../assets/qlb.svg'); mask-image: url('../assets/qlb.svg');"></div>
                     </div>
-
-                    <!-- Inner Body -->
                     <div class="relative flex-1 flex flex-col z-10 pb-4 min-h-0">
-                        
-                        <!-- Watermark -->
                         <div class="absolute right-0 top-[60px] bottom-0 flex items-center justify-center pointer-events-none select-none z-0">
                             <div class="vertical-results-watermark pr-1 md:pr-2">RESULTS</div>
                         </div>
-
-                        <!-- Program Details -->
                         <div class="relative z-10 flex items-center gap-4 md:gap-5 mb-4 md:mb-6 flex-shrink-0">
-                            <div id="posterProgCode" class="mono-font text-5xl md:text-6xl font-black text-stone-300">01</div>
+                            <div id="posterProgCode" class="mono-font text-5xl md:text-6xl font-black text-stone-300 leading-none">01</div>
                             <div class="flex flex-col border-l-[3px] border-amber-500 pl-4 md:pl-5">
                                 <span id="posterCategory" class="ml-font text-stone-500 font-bold uppercase tracking-widest text-[9px] md:text-[11px] mb-0.5">സീനിയർ</span>
                                 <h2 id="posterProgName" class="ml-font text-3xl md:text-4xl font-black text-stone-900 tracking-tight leading-none line-clamp-2">ഖിറാഅത്ത്</h2>
                             </div>
                         </div>
-
-                        <!-- Dynamic Winners List -->
                         <div id="posterWinnersContainer" class="relative z-10 flex-1 flex flex-col justify-center w-full pr-10 md:pr-14 min-h-0 overflow-hidden">
-                            <!-- JS Injected -->
                         </div>
-
                     </div>
                 </div>
-
-                <!-- BOTTOM SECTION: Dynamic Gradient Footer -->
                 <div id="posterGradientFooter" class="h-[20%] w-full relative px-6 md:px-10 py-4 md:py-5 flex items-center justify-between text-white shadow-[inset_0_10px_20px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
                     <div class="flex-1 max-w-[60%]">
                         <div class="flex items-center gap-3 mb-1.5 md:mb-2">
@@ -168,7 +194,6 @@
                             <div id="posterTimeFill" class="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
                         </div>
                     </div>
-
                     <div class="flex items-center gap-3 md:gap-4 flex-shrink-0">
                         <div class="text-right flex flex-col justify-center hidden sm:flex">
                             <span class="text-white font-black text-xs md:text-sm uppercase tracking-wider drop-shadow-md">Download</span>
