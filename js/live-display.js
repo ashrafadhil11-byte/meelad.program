@@ -22,6 +22,7 @@ const AD_DURATION = 30000;
 let isAdShowing = false;
 let adCycleIntervalId = null;
 let adDurationTimeoutId = null;
+let adSlideIntervalId = null;
 
 const announcementQueue = [];
 let isAnnouncing = false;
@@ -98,7 +99,7 @@ function updateHeader() {
 }
 
 // ─────────────────────────────────────────────
-// ADVERTISEMENT ENGINE (5 Mins)
+// ADVERTISEMENT MINI-CAROUSEL ENGINE (5 Mins)
 // ─────────────────────────────────────────────
 function startAdCycle() {
     if (adCycleIntervalId) clearInterval(adCycleIntervalId);
@@ -126,6 +127,34 @@ function triggerAdTakeover() {
     adOverlay.classList.remove('hidden');
     setTimeout(() => { adOverlay.classList.remove('opacity-0'); }, 50);
 
+    // Run the Mini-Carousel
+    let currentAdIndex = 0;
+    const adSlides = document.querySelectorAll('.ad-slide');
+    
+    function showSlide(index) {
+        adSlides.forEach((slide, i) => {
+            if (i === index) {
+                slide.classList.remove('hidden');
+                setTimeout(() => { slide.classList.remove('opacity-0', 'scale-95'); }, 50);
+            } else {
+                slide.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => { slide.classList.add('hidden'); }, 800);
+            }
+        });
+    }
+
+    showSlide(currentAdIndex);
+    
+    if (adSlideIntervalId) clearInterval(adSlideIntervalId);
+    adSlideIntervalId = setInterval(() => {
+        currentAdIndex++;
+        if (currentAdIndex < adSlides.length) {
+            showSlide(currentAdIndex);
+        } else {
+            clearInterval(adSlideIntervalId);
+        }
+    }, AD_DURATION / adSlides.length); // 10s per slide
+
     const fill = document.getElementById('adTimeFill');
     if (fill) {
         fill.style.transition = 'none'; fill.style.width = '0%';
@@ -143,11 +172,15 @@ function endAdTakeover() {
     if (!isAdShowing) return;
     isAdShowing = false;
     
+    if (adSlideIntervalId) clearInterval(adSlideIntervalId);
+    
     const adOverlay = document.getElementById('adSponsorOverlay');
     adOverlay.classList.add('opacity-0');
     
     setTimeout(() => {
         adOverlay.classList.add('hidden');
+        document.querySelectorAll('.ad-slide').forEach(s => s.classList.add('hidden', 'opacity-0', 'scale-95'));
+        
         if (!isAnnouncing) {
             const normalTopHeader = document.getElementById('normalTopHeader');
             const normalViewHeader = document.getElementById('normalViewHeader');
@@ -164,7 +197,7 @@ function endAdTakeover() {
 }
 
 // ─────────────────────────────────────────────
-// DYNAMIC POSTER ENGINE
+// DYNAMIC POSTER ENGINE (Result Takes Priority)
 // ─────────────────────────────────────────────
 function queueResultAnnouncement(resultData) {
     announcementQueue.push(resultData);
@@ -172,10 +205,13 @@ function queueResultAnnouncement(resultData) {
 }
 
 function processNextAnnouncement() {
+    // If an Ad is playing, kill it immediately to prioritize the result
     if (isAdShowing) {
         clearTimeout(adDurationTimeoutId);
+        if (adSlideIntervalId) clearInterval(adSlideIntervalId);
         const adOverlay = document.getElementById('adSponsorOverlay');
         adOverlay.classList.add('hidden', 'opacity-0');
+        document.querySelectorAll('.ad-slide').forEach(s => s.classList.add('hidden', 'opacity-0', 'scale-95'));
         isAdShowing = false;
     }
 
@@ -263,8 +299,7 @@ function renderPosterCard(res) {
         const firstPlace = winnersList.filter(w => w.rank === 1);
         const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
 
-        // Auto-Center Wrap Container
-        let html = `<div class="flex flex-col justify-center gap-3 md:gap-4 w-[90%] md:w-[85%] mx-auto mt-2 min-h-0">`;
+        let html = `<div class="flex flex-col justify-center gap-3 md:gap-4 w-[90%] md:w-[85%] mx-auto pl-4 md:pl-6 min-h-0">`;
 
         firstPlace.forEach(w => {
             html += `
