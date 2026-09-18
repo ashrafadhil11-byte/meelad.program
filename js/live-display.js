@@ -2,7 +2,6 @@ import { db, doc, onSnapshot, collection, query, where } from './firebase.js';
 
 const DEFAULT_INSTITUTE_ID = "XnTaWEgDWBqdODmxXGG4";
 const instId = DEFAULT_INSTITUTE_ID;
-
 const PUBLIC_DOMAIN_URL = "https://meelad-program.vercel.app/result.html"; 
 
 let dashboardData = null;
@@ -16,6 +15,13 @@ let currentSlideIndex = 0;
 let rotatorTimer = null;
 const ROTATION_DURATION = 9000;
 const ANNOUNCEMENT_DURATION = 30000; 
+
+// Ad Settings
+const AD_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const AD_DURATION = 30000; // 30 seconds
+let isAdShowing = false;
+let adCycleIntervalId = null;
+let adDurationTimeoutId = null;
 
 const announcementQueue = [];
 let isAnnouncing = false;
@@ -92,7 +98,73 @@ function updateHeader() {
 }
 
 // ─────────────────────────────────────────────
-// DYNAMIC POSTER ENGINE (1:1 Ratio Square)
+// ADVERTISEMENT ENGINE (5 Mins)
+// ─────────────────────────────────────────────
+function startAdCycle() {
+    if (adCycleIntervalId) clearInterval(adCycleIntervalId);
+    adCycleIntervalId = setInterval(() => {
+        triggerAdTakeover();
+    }, AD_INTERVAL);
+}
+
+function triggerAdTakeover() {
+    if (isAnnouncing) return; 
+
+    isAdShowing = true;
+    if (rotatorTimer) clearInterval(rotatorTimer);
+
+    const adOverlay = document.getElementById('adSponsorOverlay');
+    const normalTopHeader = document.getElementById('normalTopHeader');
+    const normalViewHeader = document.getElementById('normalViewHeader');
+    const normalFooter = document.getElementById('normalFooter');
+
+    document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+    if (normalTopHeader) normalTopHeader.style.opacity = '0';
+    if (normalViewHeader) normalViewHeader.style.opacity = '0';
+    if (normalFooter) normalFooter.style.opacity = '0';
+
+    adOverlay.classList.remove('hidden');
+    setTimeout(() => { adOverlay.classList.remove('opacity-0'); }, 50);
+
+    const fill = document.getElementById('adTimeFill');
+    if (fill) {
+        fill.style.transition = 'none'; fill.style.width = '0%';
+        void fill.offsetWidth;
+        fill.style.transition = `width ${AD_DURATION}ms linear`;
+        fill.style.width = '100%';
+    }
+
+    adDurationTimeoutId = setTimeout(() => {
+        endAdTakeover();
+    }, AD_DURATION);
+}
+
+function endAdTakeover() {
+    if (!isAdShowing) return;
+    isAdShowing = false;
+    
+    const adOverlay = document.getElementById('adSponsorOverlay');
+    adOverlay.classList.add('opacity-0');
+    
+    setTimeout(() => {
+        adOverlay.classList.add('hidden');
+        if (!isAnnouncing) {
+            const normalTopHeader = document.getElementById('normalTopHeader');
+            const normalViewHeader = document.getElementById('normalViewHeader');
+            const normalFooter = document.getElementById('normalFooter');
+            
+            if (normalTopHeader) normalTopHeader.style.opacity = '1';
+            if (normalViewHeader) normalViewHeader.style.opacity = '1';
+            if (normalFooter) normalFooter.style.opacity = '1';
+            
+            displayCurrentSlide();
+            startAutoRotation();
+        }
+    }, 500); 
+}
+
+// ─────────────────────────────────────────────
+// DYNAMIC POSTER ENGINE (Result Takes Priority)
 // ─────────────────────────────────────────────
 function queueResultAnnouncement(resultData) {
     announcementQueue.push(resultData);
@@ -100,6 +172,14 @@ function queueResultAnnouncement(resultData) {
 }
 
 function processNextAnnouncement() {
+    // If an Ad is currently playing, KILL IT instantly to show the Result Card
+    if (isAdShowing) {
+        clearTimeout(adDurationTimeoutId);
+        const adOverlay = document.getElementById('adSponsorOverlay');
+        adOverlay.classList.add('hidden', 'opacity-0');
+        isAdShowing = false;
+    }
+
     const overlay = document.getElementById('posterAnnouncementOverlay');
     const normalTopHeader = document.getElementById('normalTopHeader');
     const normalViewHeader = document.getElementById('normalViewHeader');
@@ -137,12 +217,10 @@ function processNextAnnouncement() {
 function renderPosterCard(res) {
     const overlay = document.getElementById('posterAnnouncementOverlay');
     
-    // Inject Gradient
     const stableId = res.programId || res.id || 'default';
     const uniqueGradient = getGradientForString(stableId);
     document.getElementById('posterGradientFooter').style.background = uniqueGradient;
 
-    // Advanced Program Code Extraction
     let rawCode = res.programCode || res.programNumber || res.code || '';
     let pName = res.programName || 'Competition Program';
     
@@ -168,12 +246,10 @@ function renderPosterCard(res) {
     document.getElementById('posterProgName').textContent = cleanName;
     document.getElementById('posterQueueCounter').textContent = `Queue: ${announcementQueue.length + 1}`;
 
-    // QR Code
     const programUrl = `${PUBLIC_DOMAIN_URL}?id=${instId}&prog=${stableId}`;
     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&format=svg&color=000000&bgcolor=ffffff&data=${encodeURIComponent(programUrl)}`;
     document.getElementById('posterQrImage').src = qrApiUrl;
 
-    // Extract Winners
     let winnersList = [];
     if (Array.isArray(res.marksData) && res.marksData.length > 0) {
         winnersList = [...res.marksData].filter(m => m.rank && m.rank <= 3).sort((a, b) => a.rank - b.rank);
@@ -188,7 +264,6 @@ function renderPosterCard(res) {
         const firstPlace = winnersList.filter(w => w.rank === 1);
         const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
 
-        // TV-Safe Centered Wrapper for Beautiful Alignment (Scaled Down)
         let html = `<div class="flex flex-col justify-center gap-3 md:gap-4 w-[90%] md:w-[85%] mx-auto pl-4 md:pl-6 min-h-0">`;
 
         firstPlace.forEach(w => {
@@ -244,7 +319,7 @@ function renderPosterCard(res) {
 }
 
 // ─────────────────────────────────────────────
-// NORMAL SCREENS (ROTATION) - TV SAFE LAYOUT
+// NORMAL SCREENS (ROTATION)
 // ─────────────────────────────────────────────
 function renderTeamChampionship() {
     const grid = document.getElementById('teamChampionshipGrid');
@@ -361,7 +436,7 @@ function buildSlidesSequence() {
 }
 
 function displayCurrentSlide() {
-    if (isAnnouncing) return;
+    if (isAnnouncing || isAdShowing) return;
 
     if (!slidesList.length) buildSlidesSequence();
     const slide = slidesList[currentSlideIndex];
@@ -421,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
         buildSlidesSequence();
         updateHeader();
         renderMarqueeRibbon();
-        if (!isAnnouncing) displayCurrentSlide();
+        if (!isAnnouncing && !isAdShowing) displayCurrentSlide();
     });
 
     const resultsCol = collection(db, "institutes", instId, "results");
@@ -446,4 +521,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     startAutoRotation();
+    startAdCycle(); // Initialize the 5-min Ad Timer loop
 });
