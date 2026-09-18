@@ -12,7 +12,8 @@ import {
     query,
     where,
     getDoc,
-    getDocs
+    getDocs,
+    setDoc // ✅ ADDED: This is required to send the remote control signal
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -53,5 +54,5 @@ try {
 
 export const db = dbInstance;
 
-// ✅ FIXED: Added getDoc and getDocs so result.html can fetch data
-export { doc, onSnapshot, collection, query, where, getDoc, getDocs };
+// ✅ FIXED: Added getDoc, getDocs, AND setDoc
+export { doc, onSnapshot, collection, query, where, getDoc, getDocs, setDoc };
