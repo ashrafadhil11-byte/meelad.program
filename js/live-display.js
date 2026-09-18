@@ -17,8 +17,8 @@ const ROTATION_DURATION = 9000;
 const ANNOUNCEMENT_DURATION = 30000; 
 
 // Ad Settings
-const AD_INTERVAL = 5 * 60 * 1000; // 5 minutes
-const AD_DURATION = 30000; // 30 seconds
+const AD_INTERVAL = 5 * 60 * 1000; 
+const AD_DURATION = 30000; 
 let isAdShowing = false;
 let adCycleIntervalId = null;
 let adDurationTimeoutId = null;
@@ -164,7 +164,7 @@ function endAdTakeover() {
 }
 
 // ─────────────────────────────────────────────
-// DYNAMIC POSTER ENGINE (Result Takes Priority)
+// DYNAMIC POSTER ENGINE
 // ─────────────────────────────────────────────
 function queueResultAnnouncement(resultData) {
     announcementQueue.push(resultData);
@@ -172,7 +172,6 @@ function queueResultAnnouncement(resultData) {
 }
 
 function processNextAnnouncement() {
-    // If an Ad is currently playing, KILL IT instantly to show the Result Card
     if (isAdShowing) {
         clearTimeout(adDurationTimeoutId);
         const adOverlay = document.getElementById('adSponsorOverlay');
@@ -264,7 +263,8 @@ function renderPosterCard(res) {
         const firstPlace = winnersList.filter(w => w.rank === 1);
         const runnersUp = winnersList.filter(w => w.rank === 2 || w.rank === 3);
 
-        let html = `<div class="flex flex-col justify-center gap-3 md:gap-4 w-[90%] md:w-[85%] mx-auto pl-4 md:pl-6 min-h-0">`;
+        // Auto-Center Wrap Container
+        let html = `<div class="flex flex-col justify-center gap-3 md:gap-4 w-[90%] md:w-[85%] mx-auto mt-2 min-h-0">`;
 
         firstPlace.forEach(w => {
             html += `
@@ -275,15 +275,15 @@ function renderPosterCard(res) {
                         ${escapeHTML(w.studentName || w.name || 'Candidate')}
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[9px] md:text-xs font-bold uppercase tracking-widest text-stone-500 whitespace-nowrap">${escapeHTML(w.teamName || w.team || 'Team')}</span>
-                        ${w.grade ? `<span class="bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded text-[8px] md:text-[9px] font-mono font-bold whitespace-nowrap">Grade: ${escapeHTML(w.grade)}</span>` : ''}
+                        <span class="text-[9px] md:text-xs font-bold uppercase tracking-widest text-stone-500 whitespace-nowrap flex-shrink-0">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                        ${w.grade ? `<span class="bg-stone-200 text-stone-600 px-1.5 py-0.5 rounded text-[8px] md:text-[9px] font-mono font-bold whitespace-nowrap flex-shrink-0">Grade: ${escapeHTML(w.grade)}</span>` : ''}
                     </div>
                 </div>
             </div>`;
         });
 
         if (runnersUp.length > 0) {
-            html += `<div class="flex flex-col gap-2 md:gap-3 pl-2 md:pl-3">`;
+            html += `<div class="flex flex-col gap-2 md:gap-3 pl-2 md:pl-3 min-h-0">`;
             runnersUp.forEach(w => {
                 html += `
                 <div class="flex items-center gap-3 md:gap-4">
@@ -293,7 +293,7 @@ function renderPosterCard(res) {
                             ${escapeHTML(w.studentName || w.name || 'Candidate')}
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <span class="text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-stone-400 whitespace-nowrap">${escapeHTML(w.teamName || w.team || 'Team')}</span>
+                            <span class="text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-stone-400 whitespace-nowrap flex-shrink-0">${escapeHTML(w.teamName || w.team || 'Team')}</span>
                         </div>
                     </div>
                 </div>`;
@@ -521,5 +521,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     startAutoRotation();
-    startAdCycle(); // Initialize the 5-min Ad Timer loop
+    startAdCycle(); 
 });
