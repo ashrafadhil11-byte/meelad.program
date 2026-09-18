@@ -10,30 +10,23 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        :root {
-            --bg-dark: #050505;
-        }
-
+        :root { --bg-dark: #050505; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-dark); color: #ffffff; margin: 0; overflow: hidden; user-select: none; }
         .cinzel-font { font-family: 'Cinzel', serif; }
         .mono-font { font-family: 'JetBrains Mono', monospace; }
 
         .bg-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%); }
         
-        /* Ambient Spotlights */
         .spotlight-1 { position: absolute; bottom: -20vh; left: 10vw; width: 30vw; height: 80vh; background: radial-gradient(ellipse at bottom, rgba(148, 163, 184, 0.15), transparent 60%); filter: blur(50px); }
         .spotlight-2 { position: absolute; bottom: -20vh; right: 10vw; width: 30vw; height: 80vh; background: radial-gradient(ellipse at bottom, rgba(180, 83, 9, 0.15), transparent 60%); filter: blur(50px); }
         .spotlight-center { position: absolute; bottom: -10vh; left: 50%; transform: translateX(-50%); width: 50vw; height: 90vh; background: radial-gradient(ellipse at bottom, rgba(245, 158, 11, 0.25), transparent 70%); filter: blur(60px); opacity: 0; transition: opacity 2s ease; }
         .spotlight-center.active { opacity: 1; }
 
-        /* Podium Cards */
         .podium-card { background: rgba(20, 20, 25, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding: 2rem; position: relative; overflow: hidden; }
-        
         .rank-2-card { height: 45vh; border-top: 4px solid #94a3b8; box-shadow: 0 -10px 40px rgba(148, 163, 184, 0.1); }
         .rank-3-card { height: 40vh; border-top: 4px solid #b45309; box-shadow: 0 -10px 40px rgba(180, 83, 9, 0.1); }
         .rank-1-card { height: 55vh; border-top: 6px solid #fbbf24; box-shadow: 0 -20px 60px rgba(251, 191, 36, 0.25); z-index: 20; background: linear-gradient(to top, rgba(20,20,25,0.9), rgba(245,158,11,0.1)); }
 
-        /* Cinematic Entrance Animations */
         .reveal-hidden { opacity: 0; transform: translateY(100px); }
         .reveal-active { opacity: 1; transform: translateY(0); transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1); }
         
@@ -65,17 +58,13 @@
 
         <!-- STATE 1: Pre-Reveal Controller -->
         <div id="preRevealState" class="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-1000">
-            <h2 class="cinzel-font text-6xl text-white font-black tracking-[0.2em] mb-12 animate-pulse">Awaiting Results...</h2>
-            <button id="btnCommenceReveal" class="px-12 py-5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 font-black text-2xl tracking-widest uppercase shadow-[0_0_40px_rgba(245,158,11,0.5)] hover:scale-105 transition-transform">
-                Commence Reveal
-            </button>
-            <p id="dataStatus" class="mt-6 text-stone-400 font-mono text-sm">Syncing Live Standings...</p>
+            <h2 class="cinzel-font text-6xl text-white font-black tracking-[0.2em] mb-4 animate-pulse">Awaiting Results...</h2>
+            <p id="dataStatus" class="mt-6 text-stone-400 font-mono text-sm uppercase tracking-widest">Waiting for remote trigger</p>
         </div>
 
         <!-- STATE 2: The Podium -->
         <main id="podiumState" class="w-full max-w-6xl mx-auto flex-1 flex items-end justify-center gap-6 pb-12 opacity-0 transition-opacity duration-1000 z-10">
             
-            <!-- Rank 2 (Left) -->
             <div id="cardRank2" class="podium-card rank-2-card w-1/3 reveal-hidden">
                 <div class="absolute top-6 left-1/2 -translate-x-1/2 text-7xl font-black text-slate-300 opacity-20">2</div>
                 <div class="flex-1 flex flex-col items-center justify-center w-full text-center">
@@ -87,7 +76,6 @@
                 </div>
             </div>
 
-            <!-- Rank 1 (Center) -->
             <div id="cardRank1" class="podium-card rank-1-card w-1/3 reveal-1-hidden">
                 <div class="absolute top-8 left-1/2 -translate-x-1/2 text-9xl font-black text-amber-500 opacity-20 pulse-gold">1</div>
                 <div class="flex-1 flex flex-col items-center justify-center w-full text-center mt-8">
@@ -99,7 +87,6 @@
                 </div>
             </div>
 
-            <!-- Rank 3 (Right) -->
             <div id="cardRank3" class="podium-card rank-3-card w-1/3 reveal-hidden">
                 <div class="absolute top-6 left-1/2 -translate-x-1/2 text-7xl font-black text-amber-700 opacity-20">3</div>
                 <div class="flex-1 flex flex-col items-center justify-center w-full text-center">
@@ -118,109 +105,76 @@
     <script type="module">
         import { db, doc, onSnapshot } from './js/firebase.js';
 
-        const DEFAULT_INSTITUTE_ID = "XnTaWEgDWBqdODmxXGG4";
-        const params = new URLSearchParams(window.location.search);
-        const instId = params.get('id') || DEFAULT_INSTITUTE_ID;
-
-        let leaderboardData = [];
+        const instId = new URLSearchParams(window.location.search).get('id') || "XnTaWEgDWBqdODmxXGG4";
         let isDataReady = false;
+        let hasTriggered = false;
 
-        // 1. Fetch Realtime Leaderboard
+        // Fetch Standings silently
         onSnapshot(doc(db, "institutes", instId, "metadata", "dashboard"), (snap) => {
             if (snap.exists()) {
-                const data = snap.data();
-                leaderboardData = data.publicLeaderboard || [];
-                
-                if (leaderboardData.length >= 3) {
+                const lb = snap.data().publicLeaderboard || [];
+                if (lb.length >= 3) {
                     isDataReady = true;
-                    document.getElementById('dataStatus').textContent = "Standings Verified & Locked. Ready for Reveal.";
-                    document.getElementById('dataStatus').classList.replace('text-stone-400', 'text-emerald-400');
-                    
-                    // Pre-fill data
-                    document.getElementById('nameRank1').textContent = leaderboardData[0].name;
-                    document.getElementById('ptsRank1').textContent = leaderboardData[0].points;
-                    
-                    document.getElementById('nameRank2').textContent = leaderboardData[1].name;
-                    document.getElementById('ptsRank2').textContent = leaderboardData[1].points;
-                    
-                    document.getElementById('nameRank3').textContent = leaderboardData[2].name;
-                    document.getElementById('ptsRank3').textContent = leaderboardData[2].points;
-                } else {
-                    document.getElementById('dataStatus').textContent = "Waiting for more results... (Need at least 3 teams)";
+                    document.getElementById('nameRank1').textContent = lb[0].name; document.getElementById('ptsRank1').textContent = lb[0].points;
+                    document.getElementById('nameRank2').textContent = lb[1].name; document.getElementById('ptsRank2').textContent = lb[1].points;
+                    document.getElementById('nameRank3').textContent = lb[2].name; document.getElementById('ptsRank3').textContent = lb[2].points;
                 }
             }
         });
 
-        // 2. Cinematic Sequence Controller
-        document.getElementById('btnCommenceReveal').addEventListener('click', () => {
-            if (!isDataReady) {
-                alert("Cannot reveal yet. Awaiting final standings calculations from judges.");
-                return;
+        // Listen for Remote Control Signal
+        onSnapshot(doc(db, "institutes", instId, "metadata", "finaleControl"), (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                if (data.trigger === true && !hasTriggered && isDataReady) {
+                    hasTriggered = true;
+                    startCinematicSequence();
+                } else if (data.trigger === false && hasTriggered) {
+                    resetScreen();
+                }
             }
+        });
 
-            // Hide Pre-Reveal Screen
+        function startCinematicSequence() {
             const preReveal = document.getElementById('preRevealState');
             preReveal.style.opacity = '0';
             setTimeout(() => { preReveal.style.display = 'none'; }, 1000);
 
-            // Show Podium Layout
             const podium = document.getElementById('podiumState');
             podium.classList.remove('opacity-0');
 
-            const card1 = document.getElementById('cardRank1');
-            const card2 = document.getElementById('cardRank2');
-            const card3 = document.getElementById('cardRank3');
-            const centerSpotlight = document.getElementById('centerSpotlight');
-
-            // ── The Choreographed Reveal Sequence ──
-
-            // 1. Reveal 3rd Place after 1 second
-            setTimeout(() => {
-                card3.classList.remove('reveal-hidden');
-                card3.classList.add('reveal-active');
-                fireMiniConfetti(0.8); // Shoot from right
-            }, 1000);
-
-            // 2. Reveal 2nd Place after 3.5 seconds
-            setTimeout(() => {
-                card2.classList.remove('reveal-hidden');
-                card2.classList.add('reveal-active');
-                fireMiniConfetti(0.2); // Shoot from left
-            }, 3500);
-
-            // 3. The Grand Reveal (1st Place) after 7 seconds
-            setTimeout(() => {
-                card1.classList.remove('reveal-1-hidden');
-                card1.classList.add('reveal-1-active');
-                centerSpotlight.classList.add('active');
-                fireGrandConfetti();
+            setTimeout(() => { document.getElementById('cardRank3').classList.replace('reveal-hidden', 'reveal-active'); fireMiniConfetti(0.8); }, 1000);
+            setTimeout(() => { document.getElementById('cardRank2').classList.replace('reveal-hidden', 'reveal-active'); fireMiniConfetti(0.2); }, 3500);
+            setTimeout(() => { 
+                document.getElementById('cardRank1').classList.replace('reveal-1-hidden', 'reveal-1-active'); 
+                document.getElementById('centerSpotlight').classList.add('active');
+                fireGrandConfetti(); 
             }, 7000);
-        });
-
-        // 3. Particle Engine (Confetti)
-        function fireMiniConfetti(xOrigin) {
-            confetti({
-                particleCount: 50,
-                spread: 60,
-                origin: { x: xOrigin, y: 0.8 },
-                colors: ['#ffffff', '#94a3b8', '#b45309']
-            });
         }
 
+        function resetScreen() {
+            hasTriggered = false;
+            document.getElementById('podiumState').classList.add('opacity-0');
+            document.getElementById('cardRank1').className = 'podium-card rank-1-card w-1/3 reveal-1-hidden';
+            document.getElementById('cardRank2').className = 'podium-card rank-2-card w-1/3 reveal-hidden';
+            document.getElementById('cardRank3').className = 'podium-card rank-3-card w-1/3 reveal-hidden';
+            document.getElementById('centerSpotlight').classList.remove('active');
+            
+            const preReveal = document.getElementById('preRevealState');
+            preReveal.style.display = 'flex';
+            setTimeout(() => { preReveal.style.opacity = '1'; }, 50);
+        }
+
+        // Particle Engines
+        function fireMiniConfetti(xOrigin) { confetti({ particleCount: 50, spread: 60, origin: { x: xOrigin, y: 0.8 }, colors: ['#ffffff', '#94a3b8', '#b45309'] }); }
         function fireGrandConfetti() {
-            var duration = 8 * 1000; // 8 seconds of intense confetti
-            var animationEnd = Date.now() + duration;
+            var duration = 8 * 1000; var animationEnd = Date.now() + duration;
             var defaults = { startVelocity: 45, spread: 360, ticks: 100, zIndex: 100 };
-
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-
             var interval = setInterval(function() {
                 var timeLeft = animationEnd - Date.now();
                 if (timeLeft <= 0) return clearInterval(interval);
-
                 var particleCount = 50 * (timeLeft / duration);
-                
-                // Fire from two sides targeting center
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }, colors: ['#fbbf24', '#f59e0b', '#ffffff'] }));
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }, colors: ['#fbbf24', '#f59e0b', '#ffffff'] }));
             }, 250);
